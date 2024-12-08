@@ -1,0 +1,23 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+nameless-py = {file = ".", editable = true}
+pycryptodome = "*"
+result = "*"
+pydantic = "*"
+cbor2 = "*"
+rich = "*"
+toml = "*"
+requests = "*"
+fastapi = "*"
+
+[dev-packages]
+tox = "*"
+sphinx = "*"
+black = "*"
+
+[requires]
+python_version = "3.13"

@@ -1,0 +1,545 @@
+import click
+import toml
+import os
+import requests
+import random
+import string
+import cbor2
+from nameless_py.native.library.main import NativeAttributeList
+from urllib.parse import urlparse
+from nameless_py.config import CREDENTIALS_DIR
+from typing import Optional, List, Union
+
+
+def save_credential(user_id: str, credential: bytes) -> None:
+    if not os.path.exists(CREDENTIALS_DIR):
+        os.makedirs(CREDENTIALS_DIR)
+    with open(os.path.join(CREDENTIALS_DIR, f"{user_id}.cred"), "wb") as f:
+        f.write(credential)
+
+
+def generate_random_name(length: int = 8) -> str:
+    letters = string.ascii_lowercase
+    return "".join(random.choice(letters) for i in range(length))
+
+
+class TomlCredentialRequest:
+    def __init__(self) -> None:
+        self.messages: List[dict] = []
+        self.issuer_key: Optional[bytes] = None
+        self.issuer_metadata: Optional[str] = None
+        self.endpoint: Optional[str] = None
+
+    def set_messages(self, messages: List[dict]) -> None:
+        if not isinstance(messages, list):
+            raise ValueError("Messages should be a list.")
+
+        parsed_messages = NativeAttributeList()
+        try:
+            parsed_messages.recover_message_list(messages)
+        except ValueError as e:
+            raise ValueError(f"Failed to recover message list: {e}")
+
+        self.messages = parsed_messages
+
+    def set_issuer_key(self, public_key: str) -> None:
+        try:
+            self.issuer_key = bytes.fromhex(public_key)
+        except ValueError:
+            raise ValueError("Invalid public key format.")
+
+    def set_issuer_metadata(self, issuer_metadata: str) -> None:
+        self.issuer_metadata = issuer_metadata
+
+    def set_endpoint(self, endpoint: str) -> None:
+        parsed_endpoint = urlparse(endpoint)
+        if not all([parsed_endpoint.scheme, parsed_endpoint.netloc]):
+            raise ValueError("Invalid endpoint URL. Please provide a well-formed URL.")
+        self.endpoint = endpoint
+
+    def validate_credential_request(self) -> bool:
+        if (
+            self.messages is None
+            or self.issuer_key is None
+            or self.endpoint is None
+            or self.issuer_metadata is None
+        ):
+            return False
+        return True
+
+    def load_file(self, path: str) -> None:
+        try:
+            config = toml.load(path)
+            self.set_messages(config["messages"])
+            self.set_issuer_key(config["public_key"])
+            self.set_issuer_metadata(config.get("issuer_metadata", None))
+            self.set_endpoint(config["endpoint"])
+        except Exception as e:
+            raise RuntimeError(f"Failed to load configuration file: {e}")
+
+    def dump_file(self, path: str) -> None:
+        config = {
+            "messages": self.messages,
+            "issuer_key": self.issuer_key.hex() if self.issuer_key else None,
+            "issuer_metadata": self.issuer_metadata,
+            "endpoint": self.endpoint,
+        }
+        if self.validate_credential_request():
+            with open(path, "w") as f:
+                toml.dump(config, f)
+        else:
+            raise ValueError("Invalid credential request configuration.")
+
+
+@click.group(help="CLI tool for managing anonymous credentials.")
+def cli() -> None:
+    pass
+
+
+@click.command(help="Helps you setup a credential request configuration file.")
+@click.argument("output_path", type=click.Path())
+@click.option("--interactive", is_flag=True, help="Run the setup interactively.")
+@click.option(
+    "--messages",
+    type=str,
+    multiple=True,
+    help="Messages to include in the credential request.",
+)
+@click.option("--public_key", type=str, help="Issuer's public key (hex).")
+@click.option(
+    "--issuer_metadata", type=str, default="", help="Issuer metadata (optional)."
+)
+@click.option("--endpoint", type=str, help="Issuer's endpoint URL.")
+def setup_credential_request(
+    output_path: str,
+    interactive: bool,
+    messages: List[str],
+    public_key: str,
+    issuer_metadata: str,
+    endpoint: str,
+) -> None:
+    """Helps you setup a credential request configuration file."""
+    credential_request = TomlCredentialRequest()
+
+    if interactive:
+        # Collect messages
+        collected_messages: List[dict[str, str]] = []
+        click.echo(
+            "Add messages to your credential, type 'done' when you are finished."
+        )
+        while True:
+            message = click.prompt("Message", type=str)
+            if message.lower() == "done":
+                break
+            try:
+                message_bytes = message.encode("ascii")
+            except UnicodeEncodeError:
+                click.echo(
+                    "Message contains non-ASCII characters. Please enter a valid ASCII message."
+                )
+                continue
+            if len(message_bytes) > 32:
+                click.echo(
+                    "Message is too long. Please enter a message that is 32 bytes or less."
+                )
+                continue
+            collected_messages.append(
+                {"visibility": "public", "value": message_bytes.hex()}
+            )
+
+        credential_request.set_messages(collected_messages)
+
+        # Collect public key
+        public_key = click.prompt("Enter the issuer's public key (hex)", type=str)
+        credential_request.set_issuer_key(public_key)
+
+        # Collect issuer metadata (optional)
+        issuer_metadata = click.prompt(
+            "Enter the issuer metadata (optional)",
+            type=str,
+            default="",
+            show_default=False,
+        )
+        if issuer_metadata:
+            credential_request.set_issuer_metadata(issuer_metadata)
+
+        # Collect endpoint
+        endpoint = click.prompt("Enter the issuer's endpoint URL", type=str)
+        credential_request.set_endpoint(endpoint)
+    else:
+        if not messages or not public_key or not endpoint:
+            raise click.UsageError(
+                "Non-interactive mode requires --messages, --public_key, and --endpoint options."
+            )
+
+        messages_list = []
+        for message in messages:
+            try:
+                message_bytes = message.encode("ascii")
+            except UnicodeEncodeError:
+                raise click.UsageError(
+                    "Messages contain non-ASCII characters. Please enter valid ASCII messages."
+                )
+            if len(message_bytes) > 32:
+                raise click.UsageError(
+                    "Messages are too long. Please enter messages that are 32 bytes or less."
+                )
+            messages_list.append({"visibility": "public", "value": message_bytes.hex()})
+
+        credential_request.set_messages(messages_list)
+        credential_request.set_issuer_key(public_key)
+        credential_request.set_issuer_metadata(issuer_metadata)
+        credential_request.set_endpoint(endpoint)
+
+    # Save to TOML file
+    credential_request.dump_file(output_path)
+
+    click.echo(f"Credential request configuration saved to {output_path}")
+
+
+class CborCredential:
+    def __init__(self) -> None:
+        self.response_credential: Optional[bytes] = None
+        self.issuer_key: Optional[bytes] = None
+        self.issuer_metadata: Optional[str] = None
+        self.endpoint: Optional[str] = None
+
+    def set_response_credential(self, response_credential: str) -> None:
+        self.response_credential = bytes.fromhex(response_credential)
+
+    def set_issuer_key(self, issuer_key: str) -> None:
+        self.issuer_key = bytes.fromhex(issuer_key)
+
+    def set_issuer_metadata(self, issuer_metadata: str) -> None:
+        self.issuer_metadata = issuer_metadata
+
+    def set_endpoint(self, endpoint: str) -> None:
+        parsed_url = urlparse(endpoint)
+        if not all([parsed_url.scheme, parsed_url.netloc]):
+            raise ValueError("Invalid URL. Please provide a valid endpoint URL.")
+        self.endpoint = endpoint
+
+    def validate_credential(self) -> bool:
+        if (
+            self.response_credential is None
+            or self.issuer_key is None
+            or self.endpoint is None
+            or self.issuer_metadata is None
+        ):
+            return False
+        return True
+
+    def load_file(self, path: str) -> None:
+        try:
+            with open(path, "rb") as f:
+                config = f.read()
+                credential_data = cbor2.loads(config)
+                self.response_credential = credential_data["response_credential"]
+                self.issuer_key = bytes.fromhex(credential_data["public_key"])
+                self.issuer_metadata = credential_data["issuer_metadata"]
+                self.endpoint = credential_data["endpoint"]
+        except Exception as e:
+            raise RuntimeError(f"Failed to load credential: {e}")
+
+    def dump_file(self) -> bytes:
+        config = {
+            "response_credential": (
+                self.response_credential.hex() if self.response_credential else None
+            ),
+            "public_key": self.issuer_key.hex() if self.issuer_key else None,
+            "issuer_metadata": self.issuer_metadata,
+            "endpoint": self.endpoint,
+        }
+        if self.validate_credential():
+            return cbor2.dumps(config)
+        else:
+            raise ValueError("Invalid credential configuration.")
+
+
+@click.command(help="Request a credential using the provided configuration file.")
+@click.argument("config_path", type=click.Path(exists=True))
+def request_credential(config_path: str) -> None:
+    try:
+        credential_request = TomlCredentialRequest()
+        credential_request.load_file(config_path)
+    except Exception as e:
+        click.echo(str(e))
+        return
+
+    try:
+        holder = Holder(
+            credential_request.issuer_key, credential_request.issuer_metadata
+        )
+        holder.set_credential_messages(credential_request.messages)
+        credential_request_data = holder.request_credential()
+    except Exception as e:
+        click.echo(f"Failed to prepare credential request: {e}")
+        return
+
+    url = "{!r}://{!r}/issue_requested_credential".format(
+        urlparse(credential_request.endpoint).scheme,
+        urlparse(credential_request.endpoint).netloc,
+    )
+    try:
+        response = requests.post(url, data={"request": credential_request_data})
+    except requests.RequestException as e:
+        click.echo(f"Failed to send request: {e}")
+        return
+
+    if response.status_code != 200:
+        click.echo(f"Failed to request credential: {response.text}")
+        return
+
+    try:
+        response_credential = response.content
+        holder.import_credential(response_credential)
+    except Exception as e:
+        click.echo(f"Failed to import credential: {e}")
+        return
+
+    try:
+        credential_id = generate_random_name()
+        save_credential(credential_id, response_credential)
+        click.echo(f"Credential Successfully Retrieved.")
+    except Exception as e:
+        click.echo(f"Failed to save credential: {e}")
+        return
+
+
+class Signature:
+    def __init__(self) -> None:
+        self.public_key: Optional[bytes] = None
+        self.proof: Optional[bytes] = None
+        self.accumulator: Optional[bytes] = None
+        self.data: Optional[bytes] = None
+
+    def set_public_key(self, public_key: str) -> None:
+        self.public_key = bytes.fromhex(public_key)
+
+    def set_proof(self, proof: str) -> None:
+        self.proof = bytes.fromhex(proof)
+
+    def set_data(self, data: str) -> None:
+        self.data = bytes.fromhex(data)
+
+    def validate_signature(self) -> bool:
+        if self.public_key is None or self.proof is None or self.data is None:
+            return False
+        return True
+
+    def load_file(self, file_path: str) -> None:
+        with open(file_path, "rb") as f:
+            data = cbor2.loads(f.read())
+        self.set_public_key(data["public_key"])
+        self.set_proof(data["proof"])
+        self.set_data(data["data"])
+
+    def dump_file(self, file_path: str) -> None:
+        data = {
+            "public_key": self.public_key.hex() if self.public_key else None,
+            "proof": self.proof.hex() if self.proof else None,
+            "data": self.data.hex() if self.data else None,
+        }
+        with open(file_path, "wb") as f:
+            if self.validate_signature():
+                f.write(cbor2.dumps(data))
+            else:
+                raise ValueError("Invalid signature configuration.")
+
+
+@click.command(help="Verify a signature using the provided data or a file.")
+@click.option(
+    "--from-file",
+    type=click.Path(exists=True),
+    required=False,
+    help="Path to a CBOR-serialized file containing the Signature data.",
+)
+@click.option(
+    "--show_attributes",
+    is_flag=True,
+    default=True,
+    help="Dump the attributes of the signature.",
+)
+@click.option(
+    "--quiet",
+    is_flag=True,
+    default=False,
+    help="Only Print If Signature Is Valid.",
+)
+@click.argument("public_key", required=False, type=str)
+@click.argument("proof", required=False, type=str)
+@click.argument("data", required=False, type=str)
+def verify_signature(
+    from_file: Optional[str],
+    show_attributes: bool,
+    quiet: bool,
+    public_key: Optional[str],
+    proof: Optional[str],
+    data: Optional[str],
+) -> None:
+    signature = Signature()
+
+    if from_file:
+        try:
+            with open(from_file, "rb") as f:
+                extracted_signature = cbor2.loads(f.read())
+                signature.load_file(extracted_signature)
+        except Exception as e:
+            click.echo(f"Failed to load signature from file: {e}")
+            return
+    else:
+        if not (public_key and proof and data):
+            click.echo("Either provide all arguments or use --from-file option.")
+            return
+        try:
+            signature.set_public_key(public_key)
+            signature.set_proof(proof)
+            signature.set_data(data)
+        except ValueError as e:
+            click.echo(f"Failed to convert input data: {e}")
+            return
+
+    try:
+        # TODO: Actually Check That Accumulator Value Is Valid
+        def verify_accumulator(accumulator: bytes) -> bool:
+            return True
+
+        verifier = Verifier(signature.public_key)
+        is_valid = verifier.verify_signature_with_attributes(
+            signature.proof, signature.data, verify_accumulator
+        )
+    except Exception as e:
+        click.echo(f"Failed to verify proof: {e}")
+        return
+
+    if is_valid and show_attributes:
+        if not quiet:
+            click.echo(f"This Is A Valid Signature.")
+
+        click.echo(f"Attributes: {is_valid}")
+    elif is_valid:
+        click.echo("This Is A Valid Signature.")
+    else:
+        raise click.UsageError("This Is Not A Valid Signature.")
+
+
+@click.command(help="Sign data with a credential.")
+@click.argument("credential_id", type=str)
+@click.argument("data_to_sign", type=str)
+@click.argument("public_indices", type=str)
+@click.option(
+    "--output",
+    type=click.Path(),
+    help="Path to the output file where the signature will be saved.",
+)
+def sign_with_credential(
+    credential_id: str, data_to_sign: str, public_indices: str, output: Optional[str]
+) -> None:
+    credential_path = os.path.join(CREDENTIALS_DIR, f"{credential_id}.cred")
+
+    if not os.path.exists(credential_path):
+        click.echo(f"Credential file for user {credential_id} does not exist.")
+        return
+
+    try:
+        credential_data = CborCredential()
+        credential_data.load_file(credential_path)
+    except Exception as e:
+        click.echo(f"Failed to read credential file: {e}")
+        return
+
+    try:
+        holder = Holder(credential_data.issuer_key, credential_data.issuer_metadata)
+        holder.import_credential(credential_data.response_credential)
+    except Exception as e:
+        click.echo(f"Failed to import credential: {e}")
+        return
+
+    try:
+        public_indices_list = list(map(int, public_indices.split(",")))
+        signature = holder.sign_with_credential(
+            data_to_sign.encode(), public_indices_list
+        )
+    except Exception as e:
+        click.echo(f"Failed to sign with credential: {e}")
+        return
+
+    if not credential_data.validate_credential():
+        click.echo(
+            "Invalid credential data. Please check the credential and try again."
+        )
+        return
+
+    signature_data = Signature()
+    if credential_data.issuer_key:
+        signature_data.set_public_key(credential_data.issuer_key.hex())
+    else:
+        click.echo(
+            "Invalid credential data. Please check the credential and try again."
+        )
+        return
+
+    signature_data.set_proof(signature.proof)
+    signature_data.set_data(signature.data.hex())
+
+    if output:
+        signature_data.dump_file(output)
+        click.echo(f"Signature saved to {output}")
+    else:
+        click.echo(f"Signature: {signature.hex()}")
+
+
+def update_credential(credential_id: str) -> None:
+    credential_path = os.path.join(CREDENTIALS_DIR, f"{credential_id}.cred")
+
+    if not os.path.exists(credential_path):
+        click.echo(f"Credential file for user {credential_id} does not exist.")
+        return
+
+    try:
+        credential_data = CborCredential()
+        credential_data.load_file(credential_path)
+    except Exception as e:
+        click.echo(f"Failed to read credential file: {e}")
+        return
+
+    try:
+        holder = Holder(credential_data.issuer_key, credential_data.issuer_metadata)
+        holder.import_credential(credential_data.response_credential)
+    except Exception as e:
+        click.echo(f"Failed to import credential: {e}")
+        return
+
+    try:
+        credential_update_request = holder.request_credential_update()
+        url = "{!r}://{!r}/update_requested_credential".format(
+            urlparse(credential_data.endpoint).scheme,
+            urlparse(credential_data.endpoint).netloc,
+        )
+        response = requests.post(url, data={"request": credential_update_request})
+    except Exception as e:
+        click.echo(f"Failed to update credential: {e}")
+        return
+
+    if response.status_code != 200:
+        click.echo(f"Failed to request credential: {response.text}")
+        return
+
+    try:
+        response_credential = response.content
+        holder.import_credential_update(response_credential)
+    except Exception as e:
+        click.echo(f"Failed to import credential update: {e}")
+        return
+
+    save_credential(credential_id, response_credential)
+    click.echo(f"Credential updated successfully.")
+
+
+cli.add_command(setup_credential_request)
+cli.add_command(request_credential)
+cli.add_command(verify_signature)
+cli.add_command(sign_with_credential)
+
+if __name__ == "__main__":
+    cli()

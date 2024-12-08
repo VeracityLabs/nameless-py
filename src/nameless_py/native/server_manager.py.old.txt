@@ -1,0 +1,87 @@
+import os
+import base64
+import click
+from nameless_py.config import SERVER_DATA_DIR
+from nameless_py.native.util.logging import ServerDataManager
+
+
+@click.group()
+@click.option("--server_dir", type=click.Path(), help="Path to server data directory")
+@click.pass_context
+def cli(ctx, server_dir):
+    ctx.ensure_object(dict)
+    ctx.obj["SERVER_DIR"] = server_dir or SERVER_DATA_DIR
+
+
+@cli.command()
+@click.pass_context
+def list(ctx):
+    if not os.path.exists(ctx.obj["SERVER_DIR"]):
+        print("\033[1mNo server data directory found.\033[0m")
+        return
+    server_ids = [
+        f
+        for f in os.listdir(ctx.obj["SERVER_DIR"])
+        if f != "default" and os.path.isfile(os.path.join(ctx.obj["SERVER_DIR"], f))
+    ]
+    print("\033[1mServer IDs:\033[0m")
+    for server_id in server_ids:
+        try:
+            decoded_id = base64.b64decode(server_id).decode("ascii")
+            print(decoded_id)
+        except base64.binascii.Error as e:
+            print(
+                f"\033[1mError decoding server ID {server_id}:\033[0m Invalid base64 encoding - {e}"
+            )
+        except UnicodeDecodeError as e:
+            print(
+                f"\033[1mError decoding server ID {server_id}:\033[0m Invalid ASCII characters - {e}"
+            )
+
+
+@cli.command()
+@click.argument("server_id")
+@click.pass_context
+def change_default(ctx, server_id):
+    try:
+        if not server_id.isalnum():
+            raise ValueError("Server ID must be alphanumeric.")
+
+        server_data_path = os.path.join(
+            ctx.obj["SERVER_DIR"],
+            base64.b64encode(server_id.encode("ascii")).decode("ascii"),
+        )
+        default_path = os.path.join(ctx.obj["SERVER_DIR"], "default")
+
+        if not os.path.exists(server_data_path):
+            raise FileNotFoundError(f"No server data found for server ID: {server_id}")
+
+        if os.path.exists(default_path):
+            os.remove(default_path)
+        os.symlink(server_data_path, default_path)
+        print(f"Default symlink changed to server ID: {server_id}")
+    except ValueError as e:
+        print(e)
+    except FileNotFoundError as e:
+        print(e)
+    except OSError as e:
+        print(f"Failed to change default symlink: {e}")
+    except Exception as e:
+        print(f"An unexpected error occurred: {e}")
+
+
+@cli.command()
+@click.argument("server_id")
+@click.argument("output_filename")
+@click.pass_context
+def decrypt(ctx, server_id, output_filename):
+    salt_file_path = os.path.join(ctx.obj["SERVER_DIR"], "salt", "saltfile")
+    with open(salt_file_path, "rb") as salt_file:
+        salt = salt_file.read()
+    decrypted_data = decrypt_server_data(server_id, salt)
+    with open(output_filename, "wb") as output_file:
+        output_file.write(decrypted_data)
+
+
+if __name__ == "__main__":
+    cli()
