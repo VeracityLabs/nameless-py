@@ -12,13 +12,11 @@ cbor2 = "*"
 rich = "*"
 requests = "*"
 fastapi = "*"
-toml = "*"
 
 [dev-packages]
 tox = "*"
 sphinx = "*"
 black = "*"
-types-toml = "*"
 
 [requires]
 python_version = "3.13"

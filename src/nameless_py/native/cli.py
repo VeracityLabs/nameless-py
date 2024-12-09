@@ -18,12 +18,11 @@ from typing import Optional, List, Union, TypedDict
 from nameless_py.config import CREDENTIALS_DIR
 from pydantic import BaseModel
 import click
-import toml
+import json
 import os
 import random
 import string
 import cbor2
-import json
 
 ###
 # Exceptions
@@ -154,12 +153,12 @@ def generate_random_name(length: int = 8) -> str:
 
 
 ###
-# TOML Credential Builder
+# JSON Credential Builder
 ###
 
 
-class TOMLCredentialBuilderParams(TypedDict):
-    """Parameters for initializing a TOMLCredentialBuilder.
+class JSONCredentialBuilderParams(TypedDict):
+    """Parameters for initializing a JSONCredentialBuilder.
 
     Attributes:
         public_key: The issuer's public key
@@ -180,13 +179,13 @@ class TOMLCredentialBuilderParams(TypedDict):
     is_requested: bool
 
 
-class TOMLCredentialBuilder:
+class JSONCredentialBuilder:
     """Builder class for managing credential configuration and requests.
 
     Handles storing credential parameters, making requests, and creating holders.
     """
 
-    def __init__(self, params: TOMLCredentialBuilderParams) -> None:
+    def __init__(self, params: JSONCredentialBuilderParams) -> None:
         """Initialize the credential builder with the given parameters.
 
         Args:
@@ -285,12 +284,12 @@ class TOMLCredentialBuilder:
 
 
 ###
-# Serialization and Deserialization of TOMLCredentialBuilder to TOML
+# Serialization and Deserialization of JSONCredentialBuilder to JSON
 ###
 
 
-class TOMLCredentialBuilderModel(BaseModel):
-    """Pydantic model representing the TOML structure of a TOMLCredentialBuilder."""
+class JSONCredentialBuilderModel(BaseModel):
+    """Pydantic model representing the JSON structure of a JSONCredentialBuilder."""
 
     public_key: HexString
     group_parameters: HexString
@@ -301,16 +300,16 @@ class TOMLCredentialBuilderModel(BaseModel):
     is_requested: bool
 
 
-class TOMLCredentialBuilderIO:
-    def recover_from_file(self, path: str) -> TOMLCredentialBuilder:
-        """Load credential configuration from a TOML file.
+class JSONCredentialBuilderIO:
+    def recover_from_file(self, path: str) -> JSONCredentialBuilder:
+        """Load credential configuration from a JSON file.
 
         Args:
-            path (str): Path to TOML config file
+            path (str): Path to JSON config file
 
         Raises:
             FileNotFoundError: If the config file does not exist
-            CredentialConfigFormatError: If the TOML format is invalid
+            CredentialConfigFormatError: If the JSON format is invalid
             CredentialConfigValidationError: If the config data is invalid
             CredentialConfigSerializationError: If CBOR serialization fails
             CredentialStoragePermissionError: If lacking required permissions
@@ -319,17 +318,18 @@ class TOMLCredentialBuilderIO:
             if not os.path.exists(path):
                 raise FileNotFoundError(f"Configuration file not found: {path}")
 
-            # Load TOML File
+            # Load JSON File
             try:
-                config = toml.load(path)
-            except toml.TomlDecodeError as e:
+                with open(path, 'r') as f:
+                    config = json.load(f)
+            except json.JSONDecodeError as e:
                 raise CredentialConfigFormatError(
-                    f"Invalid TOML format in config file: {e}"
+                    f"Invalid JSON format in config file: {e}"
                 )
 
             # Validate Against Model
             try:
-                result = TOMLCredentialBuilderModel.model_validate(config)
+                result = JSONCredentialBuilderModel.model_validate(config)
             except Exception as e:
                 raise CredentialConfigValidationError(f"Config validation failed: {e}")
 
@@ -369,7 +369,7 @@ class TOMLCredentialBuilderIO:
                     f"Failed to convert attribute list: {e}"
                 )
 
-            return TOMLCredentialBuilder(
+            return JSONCredentialBuilder(
                 {
                     "public_key": public_key,
                     "group_parameters": group_parameters,
@@ -391,13 +391,13 @@ class TOMLCredentialBuilderIO:
             raise RuntimeError(f"Unexpected error loading configuration: {e}")
 
     def dump_to_file(
-        self, toml_credential_builder: TOMLCredentialBuilder, path: str
+        self, json_credential_builder: JSONCredentialBuilder, path: str
     ) -> None:
-        """Save credential configuration to a TOML file.
+        """Save credential configuration to a JSON file.
 
         Args:
-            toml_credential_builder: The credential builder to save
-            path (str): Path to save TOML config
+            json_credential_builder: The credential builder to save
+            path (str): Path to save JSON config
 
         Raises:
             CredentialConfigValidationError: If the credential configuration is invalid
@@ -408,12 +408,12 @@ class TOMLCredentialBuilderIO:
         try:
             # Export CBOR Items To Bytes
             try:
-                public_key_bytes = toml_credential_builder.public_key.export_cbor()
+                public_key_bytes = json_credential_builder.public_key.export_cbor()
                 group_parameters_bytes = (
-                    toml_credential_builder.group_parameters.export_cbor()
+                    json_credential_builder.group_parameters.export_cbor()
                 )
                 credential_secret_bytes = (
-                    toml_credential_builder.credential_secret.export_cbor()
+                    json_credential_builder.credential_secret.export_cbor()
                 )
             except Exception as e:
                 raise CredentialConfigSerializationError(
@@ -437,7 +437,7 @@ class TOMLCredentialBuilderIO:
             # Convert Attribute List
             try:
                 attribute_list_model = AttributeListModel.from_attribute_list(
-                    toml_credential_builder.attribute_list
+                    json_credential_builder.attribute_list
                 )
             except Exception as e:
                 raise CredentialConfigSerializationError(
@@ -446,14 +446,14 @@ class TOMLCredentialBuilderIO:
 
             # Create And Validate Config Model
             try:
-                config = TOMLCredentialBuilderModel(
+                config = JSONCredentialBuilderModel(
                     public_key=public_key_hex,
                     group_parameters=group_parameters_hex,
                     credential_secret=credential_secret_hex,
                     attribute_list=attribute_list_model,
-                    issuer_metadata=toml_credential_builder.issuer_metadata,
-                    endpoint=toml_credential_builder.endpoint,
-                    is_requested=toml_credential_builder.is_requested,
+                    issuer_metadata=json_credential_builder.issuer_metadata,
+                    endpoint=json_credential_builder.endpoint,
+                    is_requested=json_credential_builder.is_requested,
                 )
             except Exception as e:
                 raise CredentialConfigValidationError(
@@ -463,7 +463,7 @@ class TOMLCredentialBuilderIO:
             # Save To File
             try:
                 with open(path, "w") as f:
-                    toml.dump(config.model_dump(), f)
+                    json.dump(config.model_dump(), f, indent=2)
             except PermissionError as e:
                 raise CredentialStoragePermissionError(
                     f"Insufficient permissions to write config file: {e}"

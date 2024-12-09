@@ -1,5 +1,5 @@
 from typing import Union, cast, Protocol, Literal
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 from nameless_py.native.util.bytes.hex_string import HexStringUtil, HexString
 import json
 
@@ -31,9 +31,7 @@ class BaseMessage(BaseModel):
     visibility: Literal["public", "private"]
     value: HexString
 
-    class Config:
-        frozen = True
-        # arbitrary_types_allowed = True
+    model_config = ConfigDict(frozen=True, arbitrary_types_allowed=True)
 
 
 ## Public Attribute
@@ -328,8 +326,7 @@ class AttributeListModel(BaseModel):
 
     messages: list[Union[PublicMessageModel, PrivateMessageModel]]
 
-    class Config:
-        frozen = True
+    model_config = ConfigDict(frozen=True, extra="forbid")
 
     def to_attribute_list(self) -> NativeAttributeList:
         """Convert model to NativeAttributeList instance."""

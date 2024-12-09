@@ -6,6 +6,7 @@ from nameless_py.native.library.types.accumulator import (
 from nameless_py.native.library.server.revoke import RevocationProtocol
 from nameless_py.native.library.server.open import OpeningProtocol
 from nameless_py.native.library.server.issue import IssuingProtocol
+from nameless_py.native.library.types.aliases import RequestedCredential
 
 
 class NativeMonolithicIssuer(RevocationProtocol, OpeningProtocol, IssuingProtocol):
@@ -72,7 +73,7 @@ class NativeMonolithicIssuer(RevocationProtocol, OpeningProtocol, IssuingProtoco
         """
         return credential_request.get_public_attributes()
 
-    def issue(self, credential_request: CredentialRequest) -> HolderBuilder:
+    def issue(self, credential_request: CredentialRequest) -> RequestedCredential:
         """
         Issue a credential in response to a request.
 
