@@ -1,7 +1,10 @@
 from typing import TypedDict
 from pydantic import BaseModel
 from nameless_py.ffi.nameless_rs import *
-from nameless_py.native.library.types.attributes import NativeAttributeList
+from nameless_py.native.library.types.attributes import (
+    NativeAttributeList,
+    AttributeListModel,
+)
 import json
 
 
@@ -75,9 +78,8 @@ class NativeCredentialHolder:
     ) -> NativeAttributeList:
         """Create a NativeAttributeList from formatted messages"""
         try:
-            message_list = NativeAttributeList()
-            message_list.recover_attribute_list(formatted_messages)
-            return message_list
+            message_list = AttributeListModel.model_validate(formatted_messages)
+            return message_list.to_attribute_list()
         except Exception as e:
             raise RuntimeError(f"Failed to recover message list: {e}")
 
@@ -93,9 +95,11 @@ class NativeCredentialHolder:
         try:
             message_list = self._extract_attribute_list_from_credential()
             if unsafe:
-                return message_list.make_private_attributes_hidden()
-            else:
                 return message_list
+            else:
+                return NativeAttributeList.from_attribute_list(
+                    message_list.get_public_attributes()
+                )
         except Exception as e:
             raise RuntimeError(f"Failed to read credential safely: {e}")
 

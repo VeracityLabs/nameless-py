@@ -18,6 +18,7 @@ toml = "*"
 tox = "*"
 sphinx = "*"
 black = "*"
+types-toml = "*"
 
 [requires]
 python_version = "3.13"

@@ -172,11 +172,11 @@ class NativeAttributeList:
 
     @classmethod
     def from_attribute_list(
-        cls, messages: list[AttributeTypes]
+        cls, messages: list[AttributeTypes] | list[PublicMessage] | list[PrivateMessage]
     ) -> "NativeAttributeList":
         """Initialize message list from list of messages."""
         instance = cls()
-        instance.messages = messages
+        instance.messages = [cast(AttributeTypes, msg) for msg in messages]
         return instance
 
     def get_attribute_list(self) -> list[AttributeTypes]:
@@ -235,7 +235,7 @@ class NativeAttributeList:
         """
         self.messages.append(PublicMessage(message))
 
-    def _get_public_message(self, index: int) -> PublicMessage:
+    def _get_public_attribute(self, index: int) -> PublicMessage:
         """Get public message at specified index.
 
         Args:
@@ -253,7 +253,7 @@ class NativeAttributeList:
             return cast(PublicMessage, self.messages[index])
         raise ValueError("Message at index is not a PublicMessage")
 
-    def _get_private_message(self, index: int) -> PrivateMessage:
+    def _get_private_attribute(self, index: int) -> PrivateMessage:
         """Get private message at specified index.
 
         Args:
@@ -279,7 +279,7 @@ class NativeAttributeList:
         """
         if index < len(self.messages):
             try:
-                public_message = self._get_public_message(index)
+                public_message = self._get_public_attribute(index)
                 self.messages[index] = PrivateMessage(public_message.value)
             except ValueError:
                 pass
@@ -292,7 +292,7 @@ class NativeAttributeList:
         """
         if index < len(self.messages):
             try:
-                private_message = self._get_private_message(index)
+                private_message = self._get_private_attribute(index)
                 self.messages[index] = PublicMessage(private_message.value)
             except ValueError:
                 pass
