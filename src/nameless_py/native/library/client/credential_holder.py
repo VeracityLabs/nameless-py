@@ -4,8 +4,8 @@ from nameless_py.ffi.nameless_rs import *
 from nameless_py.native.library.types.message_list import NativeAttributeList
 import json
 
-
-class CredentialAttributeFromJSON(BaseModel):
+# TODO: I'm Not Sure If This Is The Correct Schema.
+class ParsedCredentialAttribute(BaseModel):
     value: str
     attribute_type: AttributeType
 
@@ -16,7 +16,7 @@ class HolderParams(TypedDict):
     credential_secret: CredentialSecret
 
 
-class NativeHolder:
+class NativeCredentialHolder:
     def __init__(self, params: HolderParams) -> None:
         """Initialize a Holder from a HolderBuilder, CredentialAttributeList, and CredentialSecret"""
         try:
@@ -28,31 +28,30 @@ class NativeHolder:
         except Exception as e:
             raise RuntimeError(f"Failed to initialize holder: {e}")
 
-    def _extract_messages_from_credential(self) -> NativeAttributeList:
-        """Extract messages from the credential and return as NativeAttributeList"""
+    def _get_attribute_list_from_credential(self) -> CredentialAttributeList:
+        """Get the attribute list from the credential"""
         try:
             credential = self.holder.get_credential()
-            attribute_list = credential.get_credential_attribute_list()
+            return credential.get_credential_attribute_list()
         except Exception as e:
             raise RuntimeError(f"Failed to get attribute list: {e}")
 
+    def _parse_and_validate_attribute_list(self, attribute_list: CredentialAttributeList) -> list[ParsedCredentialAttribute]:
+        """Validate the message format"""
         try:
+            # TODO: I'm Not Sure If I'm Validating And Parsing The Attribute List Correctly
             messages_json_str = attribute_list.export_json()
             messages_json = json.loads(messages_json_str)
-        except json.JSONDecodeError as e:
-            raise RuntimeError(f"Failed to parse credential messages JSON: {e}")
-
-        try:
-            validated_messages = [
-                CredentialAttributeFromJSON(**msg) for msg in messages_json
-            ]
+            return [ParsedCredentialAttribute(**msg) for msg in messages_json]
         except ValueError as e:
             raise RuntimeError(f"Failed to validate credential messages: {e}")
         except TypeError as e:
             raise RuntimeError(f"Invalid message format in credential: {e}")
 
+    def _format_messages(self, validated_messages: list[ParsedCredentialAttribute]) -> list[dict]:
+        """Format messages with visibility and value"""
         try:
-            formatted_messages = [
+            return [
                 {
                     "visibility": (
                         "public"
@@ -66,13 +65,21 @@ class NativeHolder:
         except Exception as e:
             raise RuntimeError(f"Failed to format credential messages: {e}")
 
+    def _create_message_list(self, formatted_messages: list[dict]) -> NativeAttributeList:
+        """Create a NativeAttributeList from formatted messages"""
         try:
             message_list = NativeAttributeList()
             message_list.recover_message_list(formatted_messages)
+            return message_list
         except Exception as e:
             raise RuntimeError(f"Failed to recover message list: {e}")
 
-        return message_list
+    def _extract_messages_from_credential(self) -> NativeAttributeList:
+        """Extract messages from the credential and return as NativeAttributeList"""
+        attribute_list = self._get_attribute_list_from_credential()
+        validated_messages = self._parse_and_validate_attribute_list(attribute_list)
+        formatted_messages = self._format_messages(validated_messages)
+        return self._create_message_list(formatted_messages)
 
     def read_credential(self, unsafe: bool = False) -> NativeAttributeList:
         """Read credential messages, optionally hiding private messages"""

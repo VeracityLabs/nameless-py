@@ -14,9 +14,9 @@ import json
 # TODO: Use Of Protocol Is Not Working As Expected, It Doesn't Seem To Be Enforcing.
 ### Interface For Verifying Nameless Signatures
 class VerifiableSignatureProtocol(Protocol):
-    def get_proof(self) -> NamelessSignature: ...
+    def get_signature_of_data(self) -> NamelessSignature: ...
 
-    def get_data(self) -> bytes: ...
+    def get_hash_of_data(self) -> bytes: ...
 
     def get_accumulator_value(self) -> AccumulatorValue: ...
 
@@ -38,10 +38,10 @@ class VerifiableNamelessSignatureWithoutAccumulator(VerifiableSignatureProtocol)
     accumulator_signature: AccumulatorSignature
     accumulator_verifier: AccumulatorVerifier
 
-    def get_proof(self) -> NamelessSignature:
+    def get_signature_of_data(self) -> NamelessSignature:
         return self.proof
 
-    def get_data(self) -> bytes:
+    def get_hash_of_data(self) -> bytes:
         return self.data
 
     def get_accumulator_value(self) -> AccumulatorValue:
@@ -55,15 +55,15 @@ class VerifiableNamelessSignatureWithoutAccumulator(VerifiableSignatureProtocol)
 
     def verify(self, public_key: PublicKey, group_parameters: GroupParameters) -> bool:
         try:
-            proof = self.get_proof()
-            data = self.get_data()
+            signature = self.get_signature_of_data()
+            data_hash = self.get_hash_of_data()
             accumulator_value = self.get_accumulator_value()
             accumulator_signature = self.get_accumulator_signature()
             is_valid_accumulator = self.get_accumulator_verifier()(
                 accumulator_value, accumulator_signature
             )
-            return is_valid_accumulator & proof.verify(
-                public_key, group_parameters, accumulator_value, data
+            return is_valid_accumulator & signature.verify(
+                public_key, group_parameters, accumulator_value, data_hash
             )
         except Exception as e:
             raise RuntimeError(f"Failed to verify proof: {e}")
@@ -76,10 +76,10 @@ class VerifiableNamelessSignatureWithAccumulator(VerifiableSignatureProtocol):
     data: bytes
     accumulator_verifier: AccumulatorVerifier
 
-    def get_proof(self) -> NamelessSignature:
+    def get_signature_of_data(self) -> NamelessSignature:
         return self.proof.get_signature()
 
-    def get_data(self) -> bytes:
+    def get_hash_of_data(self) -> bytes:
         return self.data
 
     def get_accumulator_value(self) -> AccumulatorValue:
@@ -93,15 +93,15 @@ class VerifiableNamelessSignatureWithAccumulator(VerifiableSignatureProtocol):
 
     def verify(self, public_key: PublicKey, group_parameters: GroupParameters) -> bool:
         try:
-            proof = self.get_proof()
-            data = self.get_data()
+            signature = self.get_signature_of_data()
+            data_hash = self.get_hash_of_data()
             accumulator_value = self.get_accumulator_value()
             accumulator_signature = self.get_accumulator_signature()
             is_valid_accumulator = self.get_accumulator_verifier()(
                 accumulator_value, accumulator_signature
             )
-            return is_valid_accumulator & proof.verify(
-                public_key, group_parameters, accumulator_value, data
+            return is_valid_accumulator & signature.verify(
+                public_key, group_parameters, accumulator_value, data_hash
             )
         except Exception as e:
             raise RuntimeError(f"Failed to verify proof: {e}")
@@ -125,7 +125,7 @@ class NativeVerifierParams(TypedDict):
 
 
 ### Pydantic Model For Validating Signature Attributes
-class SignatureAttributeFromJSON(BaseModel):
+class ParsedSignatureAttribute(BaseModel):
     value: bytes
 
 
@@ -146,5 +146,5 @@ class NativeVerifier:
         except Exception as e:
             raise RuntimeError(f"Failed to verify proof: {e}")
 
-    def read_attributes(self, params: VerifiableSignatureObject) -> NativeAttributeList:
+    def read_attribute_list(self, params: VerifiableSignatureObject) -> NativeAttributeList:
         raise NotImplementedError("read_attribute_list not implemented")

@@ -58,7 +58,7 @@ class NativeMonolithicIssuer(RevocationProtocol, OpeningProtocol, IssuingProtoco
         """Get the underlying MonolithicIssuer instance"""
         return self.issuer
 
-    def read_attributes_from_request(
+    def read_attribute_list_from_credential_request(
         self, credential_request: CredentialRequest
     ) -> CredentialRequestAttributeList:
         """
@@ -175,7 +175,7 @@ class NativeMonolithicIssuer(RevocationProtocol, OpeningProtocol, IssuingProtoco
         """Get the maximum number of attributes supported by this issuer"""
         return self.max_messages
 
-    def revoke_user(self, identifier: Identifier) -> None:
+    def revoke_credential_using_identifier(self, identifier: Identifier) -> None:
         """
         Revoke a user's credentials.
 
@@ -191,7 +191,7 @@ class NativeMonolithicIssuer(RevocationProtocol, OpeningProtocol, IssuingProtoco
         except Exception as e:
             raise RuntimeError(f"Failed to revoke user: {e}")
 
-    def identify_user(self, nameless_signature: NamelessSignature) -> Identifier:
+    def recover_identifier_from_signature(self, signature: NamelessSignature) -> Identifier:
         """
         Recover a user's identity from their signature.
 
@@ -205,6 +205,6 @@ class NativeMonolithicIssuer(RevocationProtocol, OpeningProtocol, IssuingProtoco
             RuntimeError: If identification fails
         """
         try:
-            return self.issuer.recover_identifier(nameless_signature)
+            return self.issuer.recover_identifier(signature)
         except Exception as e:
             raise RuntimeError(f"Failed to recover user ID: {e}")

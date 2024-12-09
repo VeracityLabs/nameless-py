@@ -4,7 +4,8 @@ from nameless_py.native.library.types.message_list import (
     PublicMessage,
     PrivateMessage,
 )
-from nameless_py.native.library.client.credential_holder import NativeHolder
+from nameless_py.native.library.client.credential_holder import NativeCredentialHolder
+from nameless_py.native.library.types.aliases import RequestedCredential
 from typing import List
 
 
@@ -63,9 +64,9 @@ def convert_message_list(
     return credential_attributes
 
 
-class NativeCredentialHolderConstructor:
+class NativeCredentialBuilder:
     """
-    Class for constructing a NativeHolder.
+    Class for constructing a NativeCredentialHolder.
 
     This class handles the initialization of credential attributes and secrets,
     generating credential requests, and creating holder instances.
@@ -110,21 +111,21 @@ class NativeCredentialHolderConstructor:
         except Exception as e:
             raise RuntimeError(f"Failed to prepare credential request: {e}")
 
-    def create_holder(self, holder_builder: HolderBuilder) -> "NativeHolder":
+    def create_holder(self, holder_builder: RequestedCredential) -> "NativeCredentialHolder":
         """
-        Process the issuer's response to create a NativeHolder instance.
+        Process the issuer's response to create a NativeCredentialHolder instance.
 
         Args:
             holder_builder: The HolderBuilder containing the issuer's response
 
         Returns:
-            A new NativeHolder instance
+            A new NativeCredentialHolder instance
 
         Raises:
             RuntimeError: If holder creation fails
         """
         try:
-            return NativeHolder(
+            return NativeCredentialHolder(
                 {
                     "holder_builder": holder_builder,
                     "credential_attributes": self.credential_attributes,

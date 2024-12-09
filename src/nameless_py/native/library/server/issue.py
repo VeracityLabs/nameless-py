@@ -5,7 +5,7 @@ from typing import Protocol
 class IssuingProtocol(Protocol):
     """Protocol defining interface for issuing credentials"""
 
-    def read_attributes_from_request(
+    def read_attribute_list_from_credential_request(
         self, credential_request: CredentialRequest
     ) -> CredentialRequestAttributeList: ...
 
