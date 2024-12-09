@@ -75,7 +75,7 @@ class NativeCredentialHolderConstructor:
         self, group_parameters: GroupParameters, messages: NativeAttributeList
     ) -> None:
         """
-        Initialize a new HolderBuilder with group parameters and generate required secrets.
+        Initialize a new CredentialHolderConstructor with group parameters and generate required secrets.
 
         Args:
             group_parameters: The group parameters for the credential system
