@@ -5,4 +5,6 @@ from typing import Protocol
 class OpeningProtocol(Protocol):
     """Protocol defining interface for identifying users from signatures"""
 
-    def recover_identifier_from_signature(self, signature: NamelessSignature) -> Identifier: ...
+    def recover_identifier_from_signature(
+        self, signature: NamelessSignature
+    ) -> Identifier: ...

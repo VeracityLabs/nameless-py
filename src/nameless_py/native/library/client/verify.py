@@ -1,5 +1,5 @@
 from nameless_py.ffi.nameless_rs import *
-from nameless_py.native.library.types.message_list import NativeAttributeList
+from nameless_py.native.library.types.attributes import NativeAttributeList
 from nameless_py.native.library.types.accumulator import AccumulatorVerifier
 from dataclasses import dataclass
 from typing import Protocol, Union, TypedDict
@@ -32,17 +32,17 @@ class VerifiableSignatureProtocol(Protocol):
 ### Implementations Of The VerifiableSignatureProtocol Protocol
 @dataclass
 class VerifiableNamelessSignatureWithoutAccumulator(VerifiableSignatureProtocol):
-    proof: NamelessSignature
-    data: bytes
+    signature: NamelessSignature
+    data_hash: bytes
     accumulator_value: AccumulatorValue
     accumulator_signature: AccumulatorSignature
     accumulator_verifier: AccumulatorVerifier
 
     def get_signature_of_data(self) -> NamelessSignature:
-        return self.proof
+        return self.signature
 
     def get_hash_of_data(self) -> bytes:
-        return self.data
+        return self.data_hash
 
     def get_accumulator_value(self) -> AccumulatorValue:
         return self.accumulator_value
@@ -72,21 +72,21 @@ class VerifiableNamelessSignatureWithoutAccumulator(VerifiableSignatureProtocol)
 ### Implementation Of The VerifiableSignatureProtocol Protocol
 @dataclass
 class VerifiableNamelessSignatureWithAccumulator(VerifiableSignatureProtocol):
-    proof: NamelessSignatureWithAccumulator
-    data: bytes
+    signature: NamelessSignatureWithAccumulator
+    data_hash: bytes
     accumulator_verifier: AccumulatorVerifier
 
     def get_signature_of_data(self) -> NamelessSignature:
-        return self.proof.get_signature()
+        return self.signature.get_signature()
 
     def get_hash_of_data(self) -> bytes:
-        return self.data
+        return self.data_hash
 
     def get_accumulator_value(self) -> AccumulatorValue:
-        return self.proof.get_accumulator().get_value()
+        return self.signature.get_accumulator().get_value()
 
     def get_accumulator_signature(self) -> AccumulatorSignature:
-        return self.proof.get_accumulator().get_signature()
+        return self.signature.get_accumulator().get_signature()
 
     def get_accumulator_verifier(self) -> AccumulatorVerifier:
         return self.accumulator_verifier
@@ -146,5 +146,7 @@ class NativeVerifier:
         except Exception as e:
             raise RuntimeError(f"Failed to verify proof: {e}")
 
-    def read_attribute_list(self, params: VerifiableSignatureObject) -> NativeAttributeList:
+    def read_attribute_list(
+        self, params: VerifiableSignatureObject
+    ) -> NativeAttributeList:
         raise NotImplementedError("read_attribute_list not implemented")

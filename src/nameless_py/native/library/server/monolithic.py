@@ -191,7 +191,9 @@ class NativeMonolithicIssuer(RevocationProtocol, OpeningProtocol, IssuingProtoco
         except Exception as e:
             raise RuntimeError(f"Failed to revoke user: {e}")
 
-    def recover_identifier_from_signature(self, signature: NamelessSignature) -> Identifier:
+    def recover_identifier_from_signature(
+        self, signature: NamelessSignature
+    ) -> Identifier:
         """
         Recover a user's identity from their signature.
 

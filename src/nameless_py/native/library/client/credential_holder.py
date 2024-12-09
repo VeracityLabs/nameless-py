@@ -1,8 +1,9 @@
 from typing import TypedDict
 from pydantic import BaseModel
 from nameless_py.ffi.nameless_rs import *
-from nameless_py.native.library.types.message_list import NativeAttributeList
+from nameless_py.native.library.types.attributes import NativeAttributeList
 import json
+
 
 # TODO: I'm Not Sure If This Is The Correct Schema.
 class ParsedCredentialAttribute(BaseModel):
@@ -36,7 +37,9 @@ class NativeCredentialHolder:
         except Exception as e:
             raise RuntimeError(f"Failed to get attribute list: {e}")
 
-    def _parse_and_validate_attribute_list(self, attribute_list: CredentialAttributeList) -> list[ParsedCredentialAttribute]:
+    def _parse_and_validate_attribute_list(
+        self, attribute_list: CredentialAttributeList
+    ) -> list[ParsedCredentialAttribute]:
         """Validate the message format"""
         try:
             # TODO: I'm Not Sure If I'm Validating And Parsing The Attribute List Correctly
@@ -48,7 +51,9 @@ class NativeCredentialHolder:
         except TypeError as e:
             raise RuntimeError(f"Invalid message format in credential: {e}")
 
-    def _format_messages(self, validated_messages: list[ParsedCredentialAttribute]) -> list[dict]:
+    def _format_messages(
+        self, validated_messages: list[ParsedCredentialAttribute]
+    ) -> list[dict]:
         """Format messages with visibility and value"""
         try:
             return [
@@ -65,28 +70,30 @@ class NativeCredentialHolder:
         except Exception as e:
             raise RuntimeError(f"Failed to format credential messages: {e}")
 
-    def _create_message_list(self, formatted_messages: list[dict]) -> NativeAttributeList:
+    def _create_attribute_list(
+        self, formatted_messages: list[dict]
+    ) -> NativeAttributeList:
         """Create a NativeAttributeList from formatted messages"""
         try:
             message_list = NativeAttributeList()
-            message_list.recover_message_list(formatted_messages)
+            message_list.recover_attribute_list(formatted_messages)
             return message_list
         except Exception as e:
             raise RuntimeError(f"Failed to recover message list: {e}")
 
-    def _extract_messages_from_credential(self) -> NativeAttributeList:
+    def _extract_attribute_list_from_credential(self) -> NativeAttributeList:
         """Extract messages from the credential and return as NativeAttributeList"""
         attribute_list = self._get_attribute_list_from_credential()
         validated_messages = self._parse_and_validate_attribute_list(attribute_list)
         formatted_messages = self._format_messages(validated_messages)
-        return self._create_message_list(formatted_messages)
+        return self._create_attribute_list(formatted_messages)
 
     def read_credential(self, unsafe: bool = False) -> NativeAttributeList:
         """Read credential messages, optionally hiding private messages"""
         try:
-            message_list = self._extract_messages_from_credential()
+            message_list = self._extract_attribute_list_from_credential()
             if unsafe:
-                return message_list.hide_private_messages()
+                return message_list.make_private_attributes_hidden()
             else:
                 return message_list
         except Exception as e:

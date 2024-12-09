@@ -36,7 +36,7 @@ class TomlCredentialRequest:
 
         parsed_messages = NativeAttributeList()
         try:
-            parsed_messages.recover_message_list(messages)
+            parsed_messages.recover_attribute_list(messages)
         except ValueError as e:
             raise ValueError(f"Failed to recover message list: {e}")
 

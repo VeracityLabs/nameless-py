@@ -1,12 +1,16 @@
 from nameless_py.ffi.nameless_rs import *
-from nameless_py.native.library.types.message_list import (
+from nameless_py.native.library.types.attributes import (
     NativeAttributeList,
     PublicMessage,
     PrivateMessage,
 )
 from nameless_py.native.library.client.credential_holder import NativeCredentialHolder
 from nameless_py.native.library.types.aliases import RequestedCredential
-from typing import List
+from typing import List, TypedDict, Optional
+
+###
+# Utility Functions
+###
 
 
 def set_credential_attribute_type(
@@ -42,8 +46,8 @@ def convert_message_list(
         A list of CredentialAttributes with appropriate attribute types
     """
     # Extract public and private messages from the NativeAttributeList
-    public_messages: List[PublicMessage] = messages.get_public_message_list()
-    private_messages: List[PrivateMessage] = messages.get_private_message_list()
+    public_messages: List[PublicMessage] = messages.get_public_attributes()
+    private_messages: List[PrivateMessage] = messages.get_private_attributes()
 
     credential_attributes: List[CredentialAttribute] = []
 
@@ -64,6 +68,17 @@ def convert_message_list(
     return credential_attributes
 
 
+###
+# Credential Builder
+###
+
+
+class NativeCredentialBuilderParams(TypedDict):
+    group_parameters: GroupParameters
+    attribute_list: NativeAttributeList
+    credential_secret: Optional[CredentialSecret]
+
+
 class NativeCredentialBuilder:
     """
     Class for constructing a NativeCredentialHolder.
@@ -72,9 +87,7 @@ class NativeCredentialBuilder:
     generating credential requests, and creating holder instances.
     """
 
-    def __init__(
-        self, group_parameters: GroupParameters, messages: NativeAttributeList
-    ) -> None:
+    def __init__(self, params: NativeCredentialBuilderParams) -> None:
         """
         Initialize a new CredentialHolderConstructor with group parameters and generate required secrets.
 
@@ -86,10 +99,14 @@ class NativeCredentialBuilder:
             RuntimeError: If initialization fails
         """
         try:
-            self.group_parameters = group_parameters
-            self.credential_secret = CredentialSecret()
+            self.group_parameters: GroupParameters = params["group_parameters"]
+            self.credential_secret: CredentialSecret = (
+                params["credential_secret"]
+                if params["credential_secret"] is not None
+                else CredentialSecret()
+            )
             self.credential_attributes = CredentialAttributeList(
-                convert_message_list(messages)
+                convert_message_list(params["attribute_list"])
             )
         except Exception as e:
             raise RuntimeError(f"Failed to initialize holder builder: {e}")
@@ -111,7 +128,9 @@ class NativeCredentialBuilder:
         except Exception as e:
             raise RuntimeError(f"Failed to prepare credential request: {e}")
 
-    def create_holder(self, holder_builder: RequestedCredential) -> "NativeCredentialHolder":
+    def create_holder(
+        self, holder_builder: RequestedCredential
+    ) -> "NativeCredentialHolder":
         """
         Process the issuer's response to create a NativeCredentialHolder instance.
 

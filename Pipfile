@@ -10,9 +10,9 @@ result = "*"
 pydantic = "*"
 cbor2 = "*"
 rich = "*"
-toml = "*"
 requests = "*"
 fastapi = "*"
+toml = "*"
 
 [dev-packages]
 tox = "*"
