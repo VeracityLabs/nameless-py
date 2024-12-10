@@ -19,6 +19,14 @@ from nameless_py.native.util.cli.json_credential_request import (
     JSONCredentialBuilder,
     JSONCredentialBuilderIO,
 )
+from nameless_py.native.util.cli.jws import (
+    NamelessJWS,
+    JWSModel,
+    JWSError,
+    JWSDecodingError,
+    JWSValidationError,
+    JWSVerificationError,
+)
 from typing import Optional, List
 from nameless_py.config import CREDENTIALS_DIR
 import click
@@ -372,7 +380,7 @@ def request_credential(config_path: str) -> None:
 @click.argument("public_key", required=False, type=str)
 @click.argument("group_parameters", required=False, type=str)
 @click.argument("data_hash", required=False, type=str)
-def verify_signature(
+def verify_raw_signature(
     from_file: Optional[str],
     signature: Optional[str],
     show_attributes: bool,
@@ -451,6 +459,105 @@ def verify_signature(
         raise click.ClickException(f"Failed to verify signature: {e}")
 
 
+@click.command(help="Verify a JWS-encoded Nameless signature.")
+@click.argument("jws_file", type=click.Path(exists=True))
+@click.option(
+    "--show-attributes",
+    is_flag=True,
+    help="Show the public attributes included in the signature",
+)
+@click.option(
+    "--show-issuer",
+    is_flag=True,
+    help="Show the public key of the issuer",
+)
+@click.option(
+    "--quiet",
+    is_flag=True,
+    help="Only output VALID/INVALID",
+)
+def verify_jws_signature(
+    jws_file: str, show_attributes: bool, show_issuer: bool, quiet: bool
+) -> None:
+    """Verify a JWS-encoded Nameless signature from a file.
+
+    Args:
+        jws_file: Path to the file containing the JWS token
+        show_attributes: Whether to show the public attributes in the signature
+        show_issuer: Whether to show the issuer's public key
+        quiet: Only output VALID/INVALID
+
+    Raises:
+        click.ClickException: If verification fails
+    """
+    try:
+        # Read JWS token from file
+        try:
+            with open(jws_file, "r") as f:
+                jws_token = f.read().strip()
+        except (IOError, OSError) as e:
+            raise click.ClickException(f"Failed to read JWS file: {e}")
+
+        if not jws_token:
+            raise click.ClickException("JWS file is empty")
+
+        # Dummy accumulator verifier for now
+        accumulator_verifier: AccumulatorVerifier = lambda *args, **kwargs: True
+
+        try:
+            # Decode JWS model first to validate format
+            jws_model = JWSModel.decode(jws_token)
+        except JWSDecodingError as e:
+            raise click.ClickException(f"Invalid JWS token format: {e}")
+        except JWSValidationError as e:
+            raise click.ClickException(f"JWS token validation failed: {e}")
+
+        try:
+            # Verify the JWS token
+            is_valid = NamelessJWS.verify(jws_token, accumulator_verifier)
+        except JWSVerificationError as e:
+            raise click.ClickException(f"JWS signature verification failed: {e}")
+
+        if not quiet:
+            # Show issuer public key if requested
+            if show_issuer:
+                try:
+                    click.echo(f"Issuer Public Key: {jws_model.header.kid}")
+                except AttributeError as e:
+                    raise click.ClickException(f"Failed to read issuer public key: {e}")
+
+            # Show attributes if requested
+            if show_attributes and is_valid:
+                try:
+                    signature = NamelessSignatureWithAccumulator.import_cbor(
+                        jws_model.signature
+                    )
+                    verifiable_object = VerifiableSignature(
+                        signature, jws_model.payload, accumulator_verifier
+                    )
+                    click.echo(
+                        f"Signature attributes: {verifiable_object.get_attribute_list()}"
+                    )
+                except (ValueError, TypeError) as e:
+                    raise click.ClickException(
+                        f"Failed to decode signature attributes: {e}"
+                    )
+
+            click.echo(f"Signature verification: {'VALID' if is_valid else 'INVALID'}")
+        elif is_valid:
+            click.echo("VALID")
+        else:
+            click.echo("INVALID", err=True)
+            exit(1)
+
+    except JWSError as e:
+        # Catch any other JWS-specific errors
+        raise click.ClickException(f"JWS error: {e}")
+    except Exception as e:
+        # Catch any other unexpected errors
+        raise click.ClickException(f"Unexpected error verifying JWS token: {str(e)}")
+
+
 @click.command(help="Sign data with a credential.")
 @click.argument("credential_id", type=str)
 @click.argument("data_to_sign", type=str)
@@ -523,7 +630,8 @@ def sign_with_credential(
 
 cli.add_command(setup_credential_request)
 cli.add_command(request_credential)
-cli.add_command(verify_signature)
+cli.add_command(verify_raw_signature)
+cli.add_command(verify_jws_signature)
 cli.add_command(sign_with_credential)
 
 if __name__ == "__main__":
