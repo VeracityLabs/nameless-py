@@ -112,6 +112,9 @@ class ServerDataManager:
 
     def save(self, params: SaveServerParams):
         try:
+            if params["encrypted_name"] == "default":
+                raise ServerDataSaveError("Cannot save server data with name 'default'")
+
             if not os.path.exists(params["server_data_dir"]):
                 os.makedirs(params["server_data_dir"])
             encrypted_data = self.encryption.encrypt_data(

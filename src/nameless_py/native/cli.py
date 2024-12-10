@@ -1,28 +1,30 @@
+from nameless_py.native.util.bytes.hex_string import HexString, HexStringUtil
 from nameless_py.native.library.types.attributes import (
     NativeAttributeList,
-    AttributeListModel,
 )
-from nameless_py.native.library.client.credential_builder import (
-    NativeCredentialBuilder,
-    NativeCredentialHolder,
-)
-from nameless_py.native.library.types.aliases import RequestedCredential
-from nameless_py.native.util.bytes.hex_string import HexString, HexStringUtil
 from nameless_py.ffi.nameless_rs import (
-    GroupParameters,
-    CredentialRequest,
-    CredentialSecret,
     PublicKey,
+    GroupParameters,
+    CredentialSecret,
+    NamelessSignatureWithAccumulator,
 )
-from typing import Optional, List, Union, TypedDict
+from nameless_py.native.library.client.verify import (
+    AccumulatorVerifier,
+    VerifiableSignatureType,
+    VerifiableSignature,
+)
+from nameless_py.native.library.client.credential_holder import NativeCredentialHolder
+from nameless_py.native.util.cli.json_credential_request import (
+    JSONCredentialBuilderParams,
+    JSONCredentialBuilder,
+    JSONCredentialBuilderIO,
+)
+from typing import Optional, List
 from nameless_py.config import CREDENTIALS_DIR
-from pydantic import BaseModel
 import click
-import json
 import os
 import random
 import string
-import cbor2
 
 ###
 # Exceptions
@@ -152,346 +154,93 @@ def generate_random_name(length: int = 8) -> str:
     return "".join(random.choice(letters) for i in range(length))
 
 
-###
-# JSON Credential Builder
-###
-
-
-class JSONCredentialBuilderParams(TypedDict):
-    """Parameters for initializing a JSONCredentialBuilder.
-
-    Attributes:
-        public_key: The issuer's public key
-        group_parameters: Group parameters for the credential
-        attribute_list: List of attributes to include in credential
-        credential_secret: Secret used in credential generation
-        issuer_metadata: Optional metadata about the issuer
-        endpoint: Optional endpoint URL for the issuer
-        is_requested: Whether credential has been requested
-    """
-
-    public_key: PublicKey
-    group_parameters: GroupParameters
-    attribute_list: NativeAttributeList
-    credential_secret: CredentialSecret
-    issuer_metadata: Optional[str]
-    endpoint: Optional[str]
-    is_requested: bool
-
-
-class JSONCredentialBuilder:
-    """Builder class for managing credential configuration and requests.
-
-    Handles storing credential parameters, making requests, and creating holders.
-    """
-
-    def __init__(self, params: JSONCredentialBuilderParams) -> None:
-        """Initialize the credential builder with the given parameters.
-
-        Args:
-            params: Dictionary of required parameters
-        """
-        self.public_key: PublicKey = params["public_key"]
-        self.group_parameters: GroupParameters = params["group_parameters"]
-        self.attribute_list: NativeAttributeList = params["attribute_list"]
-        self.credential_secret: CredentialSecret = CredentialSecret()
-        self.issuer_metadata: Optional[str] = params["issuer_metadata"]
-        self.endpoint: Optional[str] = params["endpoint"]
-        self.is_requested: bool = params["is_requested"]
-
-    def set_attribute_list(self, attribute_list: NativeAttributeList) -> None:
-        """Set the list of attributes for the credential.
-
-        Args:
-            attribute_list: New list of attributes to use
-        """
-        self.attribute_list = attribute_list
-
-    def set_group_parameters(self, group_parameters: GroupParameters) -> None:
-        """Set the group parameters for the credential.
-
-        Args:
-            group_parameters: New group parameters to use
-        """
-        self.group_parameters = group_parameters
-
-    def set_issuer_metadata(self, issuer_metadata: str) -> None:
-        """Set the issuer metadata.
-
-        Args:
-            issuer_metadata: New issuer metadata string
-        """
-        self.issuer_metadata = issuer_metadata
-
-    def set_endpoint(self, endpoint: str) -> None:
-        """Set the issuer endpoint URL.
-
-        Args:
-            endpoint: New endpoint URL string
-        """
-        self.endpoint = endpoint
-
-    def get_credential_request(self) -> CredentialRequest:
-        """Generate a credential request.
-
-        Returns:
-            A new credential request object
-
-        Raises:
-            CredentialAlreadyRequestedError: If credential was already requested
-        """
-        if self.is_requested:
-            raise CredentialAlreadyRequestedError(
-                "You've Already Requested A Credential."
-            )
-
-        credential_builder = NativeCredentialBuilder(
-            {
-                "group_parameters": self.group_parameters,
-                "attribute_list": self.attribute_list,
-                "credential_secret": self.credential_secret,
-            }
-        )
-
-        self.credential_secret = credential_builder.credential_secret
-        self.is_requested = True
-        return credential_builder.request_credential()
-
-    def create_holder(
-        self, requested_credential: RequestedCredential
-    ) -> NativeCredentialHolder:
-        """Create a credential holder from a requested credential.
-
-        Args:
-            requested_credential: The object returned by the issuer when you request a credential
-
-        Returns:
-            A new credential holder object
-
-        Raises:
-            CredentialNotRequestedError: If credential has not been requested yet
-        """
-        if not self.is_requested:
-            raise CredentialNotRequestedError("You've Not Requested A Credential Yet.")
-        credential_builder = NativeCredentialBuilder(
-            {
-                "group_parameters": self.group_parameters,
-                "attribute_list": self.attribute_list,
-                "credential_secret": self.credential_secret,
-            }
-        )
-        return credential_builder.create_holder(requested_credential)
-
-
-###
-# Serialization and Deserialization of JSONCredentialBuilder to JSON
-###
-
-
-class JSONCredentialBuilderModel(BaseModel):
-    """Pydantic model representing the JSON structure of a JSONCredentialBuilder."""
-
-    public_key: HexString
-    group_parameters: HexString
-    attribute_list: AttributeListModel
-    credential_secret: HexString
-    issuer_metadata: Optional[str] = None
-    endpoint: Optional[str] = None
-    is_requested: bool
-
-
-class JSONCredentialBuilderIO:
-    def recover_from_file(self, path: str) -> JSONCredentialBuilder:
-        """Load credential configuration from a JSON file.
-
-        Args:
-            path (str): Path to JSON config file
-
-        Raises:
-            FileNotFoundError: If the config file does not exist
-            CredentialConfigFormatError: If the JSON format is invalid
-            CredentialConfigValidationError: If the config data is invalid
-            CredentialConfigSerializationError: If CBOR serialization fails
-            CredentialStoragePermissionError: If lacking required permissions
-        """
-        try:
-            if not os.path.exists(path):
-                raise FileNotFoundError(f"Configuration file not found: {path}")
-
-            # Load JSON File
-            try:
-                with open(path, 'r') as f:
-                    config = json.load(f)
-            except json.JSONDecodeError as e:
-                raise CredentialConfigFormatError(
-                    f"Invalid JSON format in config file: {e}"
-                )
-
-            # Validate Against Model
-            try:
-                result = JSONCredentialBuilderModel.model_validate(config)
-            except Exception as e:
-                raise CredentialConfigValidationError(f"Config validation failed: {e}")
-
-            # Decode Hex Strings
-            try:
-                public_key_bytes = HexStringUtil.str_to_bytes(
-                    result.public_key
-                ).unwrap()
-                group_parameters_bytes = HexStringUtil.str_to_bytes(
-                    result.group_parameters
-                ).unwrap()
-                credential_secret_bytes = HexStringUtil.str_to_bytes(
-                    result.credential_secret
-                ).unwrap()
-            except Exception as e:
-                raise CredentialConfigSerializationError(
-                    f"Failed to decode hex strings: {e}"
-                )
-
-            # Deserialize CBOR Items
-            try:
-                public_key = PublicKey.import_cbor(public_key_bytes)
-                group_parameters = GroupParameters.import_cbor(group_parameters_bytes)
-                credential_secret = CredentialSecret.import_cbor(
-                    credential_secret_bytes
-                )
-            except Exception as e:
-                raise CredentialConfigSerializationError(
-                    f"Failed to deserialize CBOR data: {e}"
-                )
-
-            # Convert Attribute List
-            try:
-                attribute_list = result.attribute_list.to_attribute_list()
-            except Exception as e:
-                raise CredentialConfigSerializationError(
-                    f"Failed to convert attribute list: {e}"
-                )
-
-            return JSONCredentialBuilder(
-                {
-                    "public_key": public_key,
-                    "group_parameters": group_parameters,
-                    "attribute_list": attribute_list,
-                    "credential_secret": credential_secret,
-                    "issuer_metadata": result.issuer_metadata,
-                    "endpoint": result.endpoint,
-                    "is_requested": result.is_requested,
-                }
-            )
-
-        except (
-            FileNotFoundError,
-            CredentialConfigError,
-            CredentialStoragePermissionError,
-        ) as e:
-            raise
-        except Exception as e:
-            raise RuntimeError(f"Unexpected error loading configuration: {e}")
-
-    def dump_to_file(
-        self, json_credential_builder: JSONCredentialBuilder, path: str
-    ) -> None:
-        """Save credential configuration to a JSON file.
-
-        Args:
-            json_credential_builder: The credential builder to save
-            path (str): Path to save JSON config
-
-        Raises:
-            CredentialConfigValidationError: If the credential configuration is invalid
-            CredentialConfigSerializationError: If serialization fails
-            CredentialStorageFileError: If unable to write the config file
-            CredentialStoragePermissionError: If lacking required permissions
-        """
-        try:
-            # Export CBOR Items To Bytes
-            try:
-                public_key_bytes = json_credential_builder.public_key.export_cbor()
-                group_parameters_bytes = (
-                    json_credential_builder.group_parameters.export_cbor()
-                )
-                credential_secret_bytes = (
-                    json_credential_builder.credential_secret.export_cbor()
-                )
-            except Exception as e:
-                raise CredentialConfigSerializationError(
-                    f"Failed to export CBOR data: {e}"
-                )
-
-            # Convert To Hex Strings
-            try:
-                public_key_hex = HexStringUtil.bytes_to_str(public_key_bytes)
-                group_parameters_hex = HexStringUtil.bytes_to_str(
-                    group_parameters_bytes
-                )
-                credential_secret_hex = HexStringUtil.bytes_to_str(
-                    credential_secret_bytes
-                )
-            except Exception as e:
-                raise CredentialConfigSerializationError(
-                    f"Failed to convert bytes to hex strings: {e}"
-                )
-
-            # Convert Attribute List
-            try:
-                attribute_list_model = AttributeListModel.from_attribute_list(
-                    json_credential_builder.attribute_list
-                )
-            except Exception as e:
-                raise CredentialConfigSerializationError(
-                    f"Failed to convert attribute list: {e}"
-                )
-
-            # Create And Validate Config Model
-            try:
-                config = JSONCredentialBuilderModel(
-                    public_key=public_key_hex,
-                    group_parameters=group_parameters_hex,
-                    credential_secret=credential_secret_hex,
-                    attribute_list=attribute_list_model,
-                    issuer_metadata=json_credential_builder.issuer_metadata,
-                    endpoint=json_credential_builder.endpoint,
-                    is_requested=json_credential_builder.is_requested,
-                )
-            except Exception as e:
-                raise CredentialConfigValidationError(
-                    f"Failed to create config model: {e}"
-                )
-
-            # Save To File
-            try:
-                with open(path, "w") as f:
-                    json.dump(config.model_dump(), f, indent=2)
-            except PermissionError as e:
-                raise CredentialStoragePermissionError(
-                    f"Insufficient permissions to write config file: {e}"
-                )
-            except OSError as e:
-                raise CredentialStorageFileError(f"Failed to write config file: {e}")
-
-        except (CredentialConfigError, CredentialStorageError) as e:
-            raise
-        except Exception as e:
-            raise RuntimeError(f"Unexpected error saving configuration: {e}")
-
-
 @click.group(help="CLI tool for managing anonymous credentials.")
 def cli() -> None:
     pass
+
+
+def _interactive_attribute_list() -> NativeAttributeList:
+    """Interactively create a list of attributes with ASCII validation.
+
+    Returns:
+        NativeAttributeList: List of validated attributes
+
+    Raises:
+        click.ClickException: If there are issues with attribute validation or encoding
+    """
+    attribute_list = NativeAttributeList()
+    while True:
+        try:
+            attr = click.prompt(
+                "Enter an Attribute (or empty to finish)", type=str, default=""
+            )
+            if not attr:
+                if len(attribute_list.messages) == 0:
+                    click.echo("Error: Must provide at least one attribute")
+                    continue
+                break
+
+            if not attr.strip():
+                click.echo("Error: Attribute cannot be empty or just whitespace")
+                continue
+
+            if not attr.isascii():
+                click.echo("Error: Attribute must contain only ASCII characters")
+                continue
+
+            try:
+                encoded_attr = attr.encode("ascii")
+            except UnicodeEncodeError:
+                click.echo("Error: Failed to encode attribute as ASCII")
+                continue
+
+            if len(encoded_attr) > 30:
+                click.echo(
+                    "Error: Attribute must be 30 bytes or less when encoded as ASCII"
+                )
+                continue
+
+            visibility = click.prompt(
+                "Should this attribute be public or private?",
+                type=click.Choice(["public", "private"]),
+                default="public",
+            )
+
+            try:
+                if visibility == "public":
+                    attribute_list.append_public_attribute(encoded_attr)
+                else:
+                    attribute_list.append_private_attribute(encoded_attr)
+            except Exception as e:
+                click.echo(f"Error adding attribute: {str(e)}")
+                continue
+
+        except click.Abort:
+            raise click.ClickException("Aborted by user")
+        except Exception as e:
+            click.echo(f"Unexpected error: {str(e)}")
+            continue
+
+    return attribute_list
 
 
 @click.command(help="Helps you setup a credential request configuration file.")
 @click.argument("output_path", type=click.Path())
 @click.option("--interactive", is_flag=True, help="Run the setup interactively.")
 @click.option(
-    "--messages",
+    "--public_attributes",
     type=str,
     multiple=True,
-    help="Messages to include in the credential request.",
+    help="Attributes to include in the credential request.",
+)
+@click.option(
+    "--private_attributes",
+    type=str,
+    multiple=True,
+    help="Private attributes to include in the credential request.",
 )
 @click.option("--public_key", type=str, help="Issuer's public key (hex).")
+@click.option("--group_parameters", type=str, help="Issuer's group parameters (hex).")
 @click.option(
     "--issuer_metadata", type=str, default="", help="Issuer metadata (optional)."
 )
@@ -499,18 +248,105 @@ def cli() -> None:
 def setup_credential_request(
     output_path: str,
     interactive: bool,
-    messages: List[str],
+    public_attributes: List[str],
+    private_attributes: List[str],
     public_key: str,
+    group_parameters: str,
     issuer_metadata: str,
     endpoint: str,
 ) -> None:
-    pass
+    # Validate Attributes
+    if len(public_attributes) > 0 or len(private_attributes) > 0 or not interactive:
+        attribute_list = NativeAttributeList()
+        for attr in public_attributes:
+            try:
+                encoded_attr = attr.encode("ascii")
+                if len(encoded_attr) > 30:
+                    raise click.ClickException(
+                        f"Public attribute '{attr}' exceeds 30 bytes when encoded"
+                    )
+                attribute_list.append_public_attribute(encoded_attr)
+            except UnicodeEncodeError:
+                raise click.ClickException(
+                    f"Public attribute '{attr}' contains non-ASCII characters"
+                )
+
+        for attr in private_attributes:
+            try:
+                encoded_attr = attr.encode("ascii")
+                if len(encoded_attr) > 30:
+                    raise click.ClickException(
+                        f"Private attribute '{attr}' exceeds 30 bytes when encoded"
+                    )
+                attribute_list.append_private_attribute(encoded_attr)
+            except UnicodeEncodeError:
+                raise click.ClickException(
+                    f"Private attribute '{attr}' contains non-ASCII characters"
+                )
+    else:
+        attribute_list = _interactive_attribute_list()
+
+    # Validate Public Key And Group Parameters
+    public_key_bytes = HexStringUtil.str_to_bytes(public_key).unwrap()
+    group_parameters_bytes = HexStringUtil.str_to_bytes(group_parameters).unwrap()
+
+    public_key_type = PublicKey.import_cbor(public_key_bytes)
+    group_parameters_type = GroupParameters.import_cbor(group_parameters_bytes)
+
+    # Create credential builder params
+    params: JSONCredentialBuilderParams = {
+        "public_key": public_key_type,
+        "group_parameters": group_parameters_type,
+        "attribute_list": attribute_list,
+        "credential_secret": CredentialSecret(),
+        "issuer_metadata": issuer_metadata if issuer_metadata else None,
+        "endpoint": endpoint if endpoint else None,
+        "is_requested": None,
+    }
+
+    try:
+        # Create credential builder with params
+        builder = JSONCredentialBuilder(params)
+    except ValueError as e:
+        raise click.ClickException(f"Invalid hex string: {e}")
+
+    # Save configuration
+    try:
+        JSONCredentialBuilderIO.dump_to_file(builder, output_path)
+        click.echo(f"Credential request configuration saved to {output_path}")
+    except Exception as e:
+        raise click.ClickException(f"Failed to save configuration: {e}")
 
 
 @click.command(help="Request a credential using the provided configuration file.")
 @click.argument("config_path", type=click.Path(exists=True))
 def request_credential(config_path: str) -> None:
-    pass
+    """Request a credential using the provided configuration file.
+
+    Args:
+        config_path: Path to the credential request configuration file
+    """
+    try:
+        # Load the credential builder from config file
+        builder = JSONCredentialBuilderIO.recover_from_file(config_path)
+
+        # Get the credential request
+        request = builder.get_credential_request()
+
+        # Save updated builder state back to file
+        JSONCredentialBuilderIO.dump_to_file(builder, config_path)
+
+        # Export the request as CBOR and print as hex
+        request_bytes = request.export_cbor()
+        request_hex = HexStringUtil.bytes_to_str(request_bytes)
+
+        # TODO: automatically send request to given endpoint.
+        click.echo(request_hex)
+
+    except CredentialAlreadyRequestedError as e:
+        raise click.ClickException(str(e))
+    except Exception as e:
+        raise click.ClickException(f"Failed to request credential: {e}")
 
 
 @click.command(help="Verify a signature using the provided data or a file.")
@@ -520,6 +356,7 @@ def request_credential(config_path: str) -> None:
     required=False,
     help="Path to a CBOR-serialized file containing the Signature data.",
 )
+@click.argument("signature", required=False, type=str)
 @click.option(
     "--show_attributes",
     is_flag=True,
@@ -533,17 +370,85 @@ def request_credential(config_path: str) -> None:
     help="Only Print If Signature Is Valid.",
 )
 @click.argument("public_key", required=False, type=str)
-@click.argument("proof", required=False, type=str)
-@click.argument("data", required=False, type=str)
+@click.argument("group_parameters", required=False, type=str)
+@click.argument("data_hash", required=False, type=str)
 def verify_signature(
     from_file: Optional[str],
+    signature: Optional[str],
     show_attributes: bool,
     quiet: bool,
-    public_key: Optional[str],
-    proof: Optional[str],
-    data: Optional[str],
+    public_key: str,
+    group_parameters: str,
+    data_hash: str,
 ) -> None:
-    pass
+    """Verify a signature using provided data or from a file.
+
+    Args:
+        from_file: Optional path to CBOR file containing signature
+        show_attributes: Whether to display signature attributes
+        quiet: Only show if signature is valid
+        public_key: Hex string of public key
+        signature: Hex string of signature
+        data_hash: Hex string of data hash to verify against
+    """
+    try:
+        if from_file:
+            # Load signature from CBOR file
+            with open(from_file, "rb") as f:
+                signature_bytes = f.read()
+                signature_obj = NamelessSignatureWithAccumulator.import_cbor(
+                    signature_bytes
+                )
+        elif signature:
+            # Parse signature hex string
+            signature_bytes = HexStringUtil.str_to_bytes(signature).unwrap()
+            signature_obj = NamelessSignatureWithAccumulator.import_cbor(
+                signature_bytes
+            )
+        else:
+            raise click.UsageError(
+                "Must provide either --from-file or signature argument"
+            )
+
+        if not all([public_key, data_hash]):
+            raise click.UsageError(
+                "Must provide public_key, signature and data_hash arguments if not using --from-file"
+            )
+
+        # Decode Data Hash and Public Key
+        data_hash_bytes = HexStringUtil.str_to_bytes(data_hash).unwrap()
+        public_key_bytes = HexStringUtil.str_to_bytes(public_key).unwrap()
+        group_parameters_bytes = HexStringUtil.str_to_bytes(group_parameters).unwrap()
+
+        # Import Public Key
+        public_key_type = PublicKey.import_cbor(public_key_bytes)
+        group_parameters_type = GroupParameters.import_cbor(group_parameters_bytes)
+
+        # Dummy Accumulator Verifier
+        accumulator_verifier: AccumulatorVerifier = lambda *args, **kwargs: True
+
+        # Verify the signature
+        verifiable_object: VerifiableSignatureType = VerifiableSignature(
+            signature_obj, data_hash_bytes, accumulator_verifier
+        )
+
+        # Verify Signature
+        is_valid = verifiable_object.verify(public_key_type, group_parameters_type)
+
+        if not quiet:
+            if show_attributes:
+                click.echo(
+                    f"Signature attributes: {verifiable_object.get_attribute_list()}"
+                )
+            click.echo(f"Signature verification: {'VALID' if is_valid else 'INVALID'}")
+        elif is_valid:
+            click.echo("VALID")
+        else:
+            click.echo("INVALID", err=True)
+            exit(1)
+
+    except Exception as e:
+        raise click.ClickException(f"Failed to verify signature: {e}")
 
 
 @click.command(help="Sign data with a credential.")
@@ -558,7 +463,62 @@ def verify_signature(
 def sign_with_credential(
     credential_id: str, data_to_sign: str, public_indices: str, output: Optional[str]
 ) -> None:
-    pass
+    """Sign data using a stored credential.
+
+    Args:
+        credential_id: ID of the credential to use for signing
+        data_to_sign: Data to sign (as hex string)
+        public_indices: Comma-separated list of attribute indices to make public
+        output: Optional path to save signature to file
+
+    Raises:
+        click.ClickException: If signing fails
+    """
+    try:
+        # Load credential from file
+        cred_path = os.path.join(CREDENTIALS_DIR, f"{credential_id}.cred")
+        if not os.path.exists(cred_path):
+            raise click.ClickException(f"Credential file not found: {cred_path}")
+
+        # Parse public indices
+        try:
+            indices = [int(i.strip()) for i in public_indices.split(",")]
+        except ValueError:
+            raise click.ClickException(
+                "Public indices must be comma-separated integers"
+            )
+
+        # Read and decode data
+        try:
+            data_bytes = HexStringUtil.str_to_bytes(data_to_sign).unwrap()
+        except Exception as e:
+            raise click.ClickException(f"Invalid data format: {e}")
+
+        # Read credential and create signature
+        try:
+            with open(cred_path, "rb") as f:
+                credential_bytes = f.read()
+                credential_holder = NativeCredentialHolder.import_cbor(credential_bytes)
+                signature = credential_holder.sign_with_credential(data_bytes, indices)
+                signature_bytes = signature.export_cbor()
+        except Exception as e:
+            raise click.ClickException(f"Failed to create signature: {e}")
+
+        # Save or output signature
+        if output:
+            try:
+                with open(output, "wb") as f:
+                    f.write(signature_bytes)
+                click.echo(f"Signature saved to {output}")
+            except Exception as e:
+                raise click.ClickException(f"Failed to save signature: {e}")
+        else:
+            click.echo(HexStringUtil.bytes_to_str(signature_bytes))
+
+    except click.ClickException:
+        raise
+    except Exception as e:
+        raise click.ClickException(f"Unexpected error: {e}")
 
 
 cli.add_command(setup_credential_request)

@@ -9,9 +9,10 @@ pycryptodome = "*"
 result = "*"
 pydantic = "*"
 cbor2 = "*"
-rich = "*"
 requests = "*"
+uvicorn = "*"
 fastapi = "*"
+rich = "*"
 
 [dev-packages]
 tox = "*"
