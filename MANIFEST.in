@@ -1,0 +1,1 @@
+include src/nameless_py/ffi/*.so 

@@ -8,25 +8,32 @@ from nameless_py.native.library.client.credential_builder import (
 import os
 
 
-@pytest.fixture
-def issuer() -> NativeMonolithicIssuer:
-    """Create a NativeMonolithicIssuer instance with 5 max attributes"""
-    return NativeMonolithicIssuer(5)
+def test_issuer() -> None:
+    """Test creating a NativeMonolithicIssuer instance with 5 max attributes.
+
+    Tests that a NativeMonolithicIssuer can be instantiated with a max attribute count of 5.
+    """
+    issuer = NativeMonolithicIssuer(5)
+    assert isinstance(issuer, NativeMonolithicIssuer)
 
 
-@pytest.fixture
-def attribute_list() -> NativeAttributeList:
-    """Create a NativeAttributeList with some test attributes"""
+def test_attribute_list() -> None:
+    """Test creating a NativeAttributeList with test attributes.
+
+    Tests that a NativeAttributeList can be created and populated with both public and private attributes.
+    """
     attributes = NativeAttributeList()
-
     attributes.append_public_attribute(b"public_attr_1")
     attributes.append_private_attribute(b"private_attr_1")
     attributes.append_public_attribute(b"public_attr_2")
-    return attributes
+    assert isinstance(attributes, NativeAttributeList)
 
 
-@pytest.fixture
-def test_credential_builder() -> NativeCredentialBuilder:
+def test_credential_builder() -> None:
+    """Test creating a NativeCredentialBuilder.
+
+    Tests that a NativeCredentialBuilder can be instantiated with an issuer and attribute list.
+    """
     # Create an issuer
     issuer = NativeMonolithicIssuer(5)
 
@@ -37,11 +44,21 @@ def test_credential_builder() -> NativeCredentialBuilder:
     attribute_list.append_public_attribute(b"public_attr_2")
 
     # Create a NativeCredentialBuilder instance with the given issuer and attribute list
-    return NativeCredentialBuilder(issuer, attribute_list)
+    builder = NativeCredentialBuilder(
+        {
+            "group_parameters": issuer.get_group_parameters(),
+            "attribute_list": attribute_list,
+            "credential_secret": None,
+        }
+    )
+    assert isinstance(builder, NativeCredentialBuilder)
 
 
-@pytest.fixture
-def test_credential_issuing() -> NativeCredentialHolder:
+def test_credential_issuing() -> None:
+    """Test the full credential issuance flow.
+
+    Tests that credentials can be requested, issued and imported into a holder.
+    """
     # Create an issuer
     issuer = NativeMonolithicIssuer(5)
 
@@ -63,15 +80,21 @@ def test_credential_issuing() -> NativeCredentialHolder:
     # Create a credential request
     credential_request = builder.request_credential()
 
+    print("Public Attributes, JSON: ", credential_request.get_public_attributes().export_json())
+
     # Issue the credential
     requested_credential = issuer.issue(credential_request)
 
     # Import the credential
-    return builder.create_holder(requested_credential)
+    holder = builder.create_holder(requested_credential)
+    assert isinstance(holder, NativeCredentialHolder)
 
 
-@pytest.fixture
-def test_conditional_issuance() -> NativeCredentialHolder:
+def test_conditional_issuance() -> None:
+    """Test conditional credential issuance.
+
+    Tests that credentials can be issued with conditions based on public attributes.
+    """
     # Create an issuer
     issuer = NativeMonolithicIssuer(5)
 
@@ -100,4 +123,15 @@ def test_conditional_issuance() -> NativeCredentialHolder:
     requested_credential = issuer.issue(credential_request)
 
     # Import the credential
-    return builder.create_holder(requested_credential)
+    assert isinstance(
+        builder.create_holder(requested_credential), NativeCredentialHolder
+    )
+
+
+def test_monolithic_issuer() -> None:
+    """Test basic NativeMonolithicIssuer instantiation.
+
+    Tests that a NativeMonolithicIssuer can be created with a max attribute count of 2.
+    """
+    issuer = NativeMonolithicIssuer(2)
+    assert issuer is not None
