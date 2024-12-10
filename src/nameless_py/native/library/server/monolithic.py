@@ -31,6 +31,12 @@ class CredentialUpdateError(IssuerError):
     pass
 
 
+class CredentialExportError(IssuerError):
+    """Error exporting credentials"""
+
+    pass
+
+
 class AccumulatorError(IssuerError):
     """Error accessing accumulator store"""
 
@@ -95,6 +101,7 @@ class NativeMonolithicIssuer(RevocationProtocol, OpeningProtocol, IssuingProtoco
 
         try:
             # Copy accumulator values from the existing issuer
+            # TODO: optimize by using a single call to get_accumulator_store(), getting the JSON, then deserializing it.
             accumulator_store = instance.issuer.get_accumulator_store()
             number_of_epochs = accumulator_store.get_current_epoch()
             for epoch in range(number_of_epochs):
@@ -106,6 +113,20 @@ class NativeMonolithicIssuer(RevocationProtocol, OpeningProtocol, IssuingProtoco
             return instance
         except Exception as e:
             raise AccumulatorError(f"Failed to copy accumulator values: {e}")
+
+    @classmethod
+    def import_cbor(cls, cbor: bytes) -> "NativeMonolithicIssuer":
+        """Initialize a NativeMonolithicIssuer from a CBOR-encoded credential"""
+        instance = cls(0)
+        instance.issuer = MonolithicIssuer.import_cbor(cbor)
+        return instance
+
+    def export_cbor(self) -> bytes:
+        """Export the NativeMonolithicIssuer as a CBOR-encoded credential"""
+        try:
+            return self.issuer.export_cbor()
+        except Exception as e:
+            raise CredentialExportError(f"Failed to export issuer: {e}")
 
     def get_issuer(self) -> MonolithicIssuer:
         """Get the underlying MonolithicIssuer instance"""

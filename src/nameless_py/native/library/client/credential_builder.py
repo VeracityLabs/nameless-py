@@ -1,11 +1,14 @@
 from nameless_py.ffi.nameless_rs import *
 from nameless_py.native.library.types.attributes import (
     NativeAttributeList,
-    PublicMessage,
-    PrivateMessage,
+    AttributeTypes,
 )
 from nameless_py.native.library.client.credential_holder import NativeCredentialHolder
 from typing import List, TypedDict, Optional
+import sys
+
+# Determine System Endianness
+endianness = "le" if sys.byteorder == "little" else "be"
 
 ###
 # Exceptions
@@ -83,29 +86,34 @@ def convert_message_list(
         AttributeConversionError: If conversion of any attribute fails
     """
     try:
-        # Extract public and private messages from the NativeAttributeList
-        public_messages: List[PublicMessage] = messages.get_public_attributes()
-        private_messages: List[PrivateMessage] = messages.get_private_attributes()
-
+        # Extract list of attributes from the NativeAttributeList
+        native_attributes: List[AttributeTypes] = messages.get_attribute_list()
         credential_attributes: List[CredentialAttribute] = []
 
-        # Convert public messages to CredentialAttributes
-        for public_message in public_messages:
-            attribute = CredentialAttribute.from_be_bytes_mod_order(
-                public_message.value
-            )
-            credential_attributes.append(
-                set_credential_attribute_type(AttributeType.PUBLIC, attribute)
+        # Determine conversion function based on system endianness
+        def convert_to_credential_attribute(value: bytes) -> CredentialAttribute:
+            return (
+                CredentialAttribute.from_le_bytes_mod_order(value)
+                if endianness == "le"
+                else CredentialAttribute.from_be_bytes_mod_order(value)
             )
 
-        # Convert private messages to CredentialAttributes
-        for private_message in private_messages:
-            attribute = CredentialAttribute.from_be_bytes_mod_order(
-                private_message.value
-            )
-            credential_attributes.append(
-                set_credential_attribute_type(AttributeType.PRIVATE, attribute)
-            )
+        # Convert attributes to CredentialAttributes based on visibility
+        for attribute in native_attributes:
+            if attribute.visibility == "Public":
+                credential_attribute = convert_to_credential_attribute(attribute.value)
+                credential_attributes.append(
+                    set_credential_attribute_type(
+                        AttributeType.PUBLIC, credential_attribute
+                    )
+                )
+            else:
+                credential_attribute = convert_to_credential_attribute(attribute.value)
+                credential_attributes.append(
+                    set_credential_attribute_type(
+                        AttributeType.PRIVATE, credential_attribute
+                    )
+                )
 
         return credential_attributes
     except AttributeConversionError:
@@ -184,7 +192,7 @@ class NativeCredentialBuilder:
         Process the issuer's response to create a NativeCredentialHolder instance.
 
         Args:
-            holder_builder: The PartialCredential containing the issuer's response
+            partial_credential: The PartialCredential containing the issuer's response
 
         Returns:
             A new NativeCredentialHolder instance
@@ -195,7 +203,7 @@ class NativeCredentialBuilder:
         try:
             return NativeCredentialHolder(
                 {
-                    "holder_builder": partial_credential,
+                    "partial_credential": partial_credential,
                     "credential_attributes": self.credential_attributes,
                     "credential_secret": self.credential_secret,
                 }

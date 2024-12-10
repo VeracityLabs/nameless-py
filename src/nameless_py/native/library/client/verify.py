@@ -68,7 +68,7 @@ class VerifiableSignatureProtocol(Protocol):
 
 ### Implementations Of The VerifiableSignatureProtocol Protocol
 @dataclass
-class VerifiableNamelessSignatureWithoutAccumulator(VerifiableSignatureProtocol):
+class VerifiableSignatureWithoutAccumulator(VerifiableSignatureProtocol):
     signature: NamelessSignature
     data_hash: bytes
     accumulator_value: AccumulatorValue
@@ -130,7 +130,7 @@ class VerifiableNamelessSignatureWithoutAccumulator(VerifiableSignatureProtocol)
 
 ### Implementation Of The VerifiableSignatureProtocol Protocol
 @dataclass
-class VerifiableNamelessSignatureWithAccumulator(VerifiableSignatureProtocol):
+class VerifiableSignature(VerifiableSignatureProtocol):
     signature: NamelessSignatureWithAccumulator
     data_hash: bytes
     accumulator_verifier: AccumulatorVerifier
@@ -193,9 +193,9 @@ class VerifiableNamelessSignatureWithAccumulator(VerifiableSignatureProtocol):
 ###
 
 ### Union Of All Data Types Which Implement Features Needed For Signature Verification (VerifiableSignatureProtocol)
-VerifiableSignatureObject = Union[
-    VerifiableNamelessSignatureWithoutAccumulator,
-    VerifiableNamelessSignatureWithAccumulator,
+VerifiableSignatureType = Union[
+    VerifiableSignatureWithoutAccumulator,
+    VerifiableSignature,
 ]
 
 
@@ -226,7 +226,7 @@ class NativeVerifier:
         except Exception as e:
             raise VerifierInitializationError(f"Failed to initialize verifier: {e}")
 
-    def verify_signature(self, params: VerifiableSignatureObject) -> bool:
+    def verify_signature(self, params: VerifiableSignatureType) -> bool:
         try:
             return params.verify(self.public_key, self.group_parameters)
         except (
@@ -239,7 +239,7 @@ class NativeVerifier:
             raise VerifierError(f"Unexpected error during verification: {e}")
 
     def read_attribute_list(
-        self, params: VerifiableSignatureObject
+        self, params: VerifiableSignatureType
     ) -> NativeAttributeList:
         try:
             return params.get_attribute_list()

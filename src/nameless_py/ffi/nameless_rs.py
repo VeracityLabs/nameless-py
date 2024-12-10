@@ -595,6 +595,10 @@ def _uniffi_check_api_checksums(lib):
         raise InternalError(
             "UniFFI API checksum mismatch: try cleaning and rebuilding your project"
         )
+    if lib.uniffi_nameless_rs_checksum_method_credentialattribute_set_type() != 41036:
+        raise InternalError(
+            "UniFFI API checksum mismatch: try cleaning and rebuilding your project"
+        )
     if lib.uniffi_nameless_rs_checksum_method_credentialattribute_switch() != 10107:
         raise InternalError(
             "UniFFI API checksum mismatch: try cleaning and rebuilding your project"
@@ -641,14 +645,14 @@ def _uniffi_check_api_checksums(lib):
         )
     if (
         lib.uniffi_nameless_rs_checksum_method_credentialholder_create_signature()
-        != 29222
+        != 7936
     ):
         raise InternalError(
             "UniFFI API checksum mismatch: try cleaning and rebuilding your project"
         )
     if (
         lib.uniffi_nameless_rs_checksum_method_credentialholder_create_signature_with_accumulator()
-        != 35259
+        != 10336
     ):
         raise InternalError(
             "UniFFI API checksum mismatch: try cleaning and rebuilding your project"
@@ -665,6 +669,13 @@ def _uniffi_check_api_checksums(lib):
             "UniFFI API checksum mismatch: try cleaning and rebuilding your project"
         )
     if lib.uniffi_nameless_rs_checksum_method_credentialholder_export_json() != 42421:
+        raise InternalError(
+            "UniFFI API checksum mismatch: try cleaning and rebuilding your project"
+        )
+    if (
+        lib.uniffi_nameless_rs_checksum_method_credentialholder_get_attribute_list()
+        != 33669
+    ):
         raise InternalError(
             "UniFFI API checksum mismatch: try cleaning and rebuilding your project"
         )
@@ -696,13 +707,6 @@ def _uniffi_check_api_checksums(lib):
     if (
         lib.uniffi_nameless_rs_checksum_method_credentialholder_get_public_key()
         != 50760
-    ):
-        raise InternalError(
-            "UniFFI API checksum mismatch: try cleaning and rebuilding your project"
-        )
-    if (
-        lib.uniffi_nameless_rs_checksum_method_credentialholder_switch_at_index()
-        != 35582
     ):
         raise InternalError(
             "UniFFI API checksum mismatch: try cleaning and rebuilding your project"
@@ -1376,7 +1380,7 @@ def _uniffi_check_api_checksums(lib):
         raise InternalError(
             "UniFFI API checksum mismatch: try cleaning and rebuilding your project"
         )
-    if lib.uniffi_nameless_rs_checksum_constructor_namelesssignature_new() != 29780:
+    if lib.uniffi_nameless_rs_checksum_constructor_namelesssignature_new() != 1326:
         raise InternalError(
             "UniFFI API checksum mismatch: try cleaning and rebuilding your project"
         )
@@ -2050,6 +2054,12 @@ _UniffiLib.uniffi_nameless_rs_fn_method_credentialattribute_get_type.argtypes = 
 _UniffiLib.uniffi_nameless_rs_fn_method_credentialattribute_get_type.restype = (
     _UniffiRustBuffer
 )
+_UniffiLib.uniffi_nameless_rs_fn_method_credentialattribute_set_type.argtypes = (
+    ctypes.c_void_p,
+    _UniffiRustBuffer,
+    ctypes.POINTER(_UniffiRustCallStatus),
+)
+_UniffiLib.uniffi_nameless_rs_fn_method_credentialattribute_set_type.restype = None
 _UniffiLib.uniffi_nameless_rs_fn_method_credentialattribute_switch.argtypes = (
     ctypes.c_void_p,
     ctypes.POINTER(_UniffiRustCallStatus),
@@ -2251,6 +2261,7 @@ _UniffiLib.uniffi_nameless_rs_fn_constructor_credentialholder_new.restype = (
 _UniffiLib.uniffi_nameless_rs_fn_method_credentialholder_create_signature.argtypes = (
     ctypes.c_void_p,
     _UniffiRustBuffer,
+    _UniffiRustBuffer,
     ctypes.POINTER(_UniffiRustCallStatus),
 )
 _UniffiLib.uniffi_nameless_rs_fn_method_credentialholder_create_signature.restype = (
@@ -2258,6 +2269,7 @@ _UniffiLib.uniffi_nameless_rs_fn_method_credentialholder_create_signature.restyp
 )
 _UniffiLib.uniffi_nameless_rs_fn_method_credentialholder_create_signature_with_accumulator.argtypes = (
     ctypes.c_void_p,
+    _UniffiRustBuffer,
     _UniffiRustBuffer,
     ctypes.POINTER(_UniffiRustCallStatus),
 )
@@ -2285,6 +2297,13 @@ _UniffiLib.uniffi_nameless_rs_fn_method_credentialholder_export_json.argtypes = 
 )
 _UniffiLib.uniffi_nameless_rs_fn_method_credentialholder_export_json.restype = (
     _UniffiRustBuffer
+)
+_UniffiLib.uniffi_nameless_rs_fn_method_credentialholder_get_attribute_list.argtypes = (
+    ctypes.c_void_p,
+    ctypes.POINTER(_UniffiRustCallStatus),
+)
+_UniffiLib.uniffi_nameless_rs_fn_method_credentialholder_get_attribute_list.restype = (
+    ctypes.c_void_p
 )
 _UniffiLib.uniffi_nameless_rs_fn_method_credentialholder_get_credential.argtypes = (
     ctypes.c_void_p,
@@ -2321,12 +2340,6 @@ _UniffiLib.uniffi_nameless_rs_fn_method_credentialholder_get_public_key.argtypes
 _UniffiLib.uniffi_nameless_rs_fn_method_credentialholder_get_public_key.restype = (
     ctypes.c_void_p
 )
-_UniffiLib.uniffi_nameless_rs_fn_method_credentialholder_switch_at_index.argtypes = (
-    ctypes.c_void_p,
-    ctypes.c_uint32,
-    ctypes.POINTER(_UniffiRustCallStatus),
-)
-_UniffiLib.uniffi_nameless_rs_fn_method_credentialholder_switch_at_index.restype = None
 _UniffiLib.uniffi_nameless_rs_fn_clone_credentialrequest.argtypes = (
     ctypes.c_void_p,
     ctypes.POINTER(_UniffiRustCallStatus),
@@ -2801,6 +2814,7 @@ _UniffiLib.uniffi_nameless_rs_fn_constructor_namelesssignature_new.argtypes = (
     ctypes.c_void_p,
     ctypes.c_void_p,
     ctypes.c_void_p,
+    _UniffiRustBuffer,
     _UniffiRustBuffer,
     ctypes.POINTER(_UniffiRustCallStatus),
 )
@@ -3589,6 +3603,10 @@ _UniffiLib.uniffi_nameless_rs_checksum_method_credentialattribute_get_type.argty
 _UniffiLib.uniffi_nameless_rs_checksum_method_credentialattribute_get_type.restype = (
     ctypes.c_uint16
 )
+_UniffiLib.uniffi_nameless_rs_checksum_method_credentialattribute_set_type.argtypes = ()
+_UniffiLib.uniffi_nameless_rs_checksum_method_credentialattribute_set_type.restype = (
+    ctypes.c_uint16
+)
 _UniffiLib.uniffi_nameless_rs_checksum_method_credentialattribute_switch.argtypes = ()
 _UniffiLib.uniffi_nameless_rs_checksum_method_credentialattribute_switch.restype = (
     ctypes.c_uint16
@@ -3641,6 +3659,10 @@ _UniffiLib.uniffi_nameless_rs_checksum_method_credentialholder_export_json.argty
 _UniffiLib.uniffi_nameless_rs_checksum_method_credentialholder_export_json.restype = (
     ctypes.c_uint16
 )
+_UniffiLib.uniffi_nameless_rs_checksum_method_credentialholder_get_attribute_list.argtypes = ()
+_UniffiLib.uniffi_nameless_rs_checksum_method_credentialholder_get_attribute_list.restype = (
+    ctypes.c_uint16
+)
 _UniffiLib.uniffi_nameless_rs_checksum_method_credentialholder_get_credential.argtypes = ()
 _UniffiLib.uniffi_nameless_rs_checksum_method_credentialholder_get_credential.restype = (
     ctypes.c_uint16
@@ -3659,10 +3681,6 @@ _UniffiLib.uniffi_nameless_rs_checksum_method_credentialholder_get_last_valid_ac
 )
 _UniffiLib.uniffi_nameless_rs_checksum_method_credentialholder_get_public_key.argtypes = ()
 _UniffiLib.uniffi_nameless_rs_checksum_method_credentialholder_get_public_key.restype = (
-    ctypes.c_uint16
-)
-_UniffiLib.uniffi_nameless_rs_checksum_method_credentialholder_switch_at_index.argtypes = ()
-_UniffiLib.uniffi_nameless_rs_checksum_method_credentialholder_switch_at_index.restype = (
     ctypes.c_uint16
 )
 _UniffiLib.uniffi_nameless_rs_checksum_method_credentialrequest_export_cbor.argtypes = ()
@@ -5138,6 +5156,9 @@ class CredentialAttributeProtocol(typing.Protocol):
     ):
         raise NotImplementedError
 
+    def set_type(self, attribute_type: "AttributeType"):
+        raise NotImplementedError
+
     def switch(
         self,
     ):
@@ -5313,6 +5334,15 @@ class CredentialAttribute:
                 _UniffiLib.uniffi_nameless_rs_fn_method_credentialattribute_get_type,
                 self._uniffi_clone_pointer(),
             )
+        )
+
+    def set_type(self, attribute_type: "AttributeType") -> None:
+        _UniffiConverterTypeAttributeType.check_lower(attribute_type)
+
+        _uniffi_rust_call(
+            _UniffiLib.uniffi_nameless_rs_fn_method_credentialattribute_set_type,
+            self._uniffi_clone_pointer(),
+            _UniffiConverterTypeAttributeType.lower(attribute_type),
         )
 
     def switch(
@@ -5782,10 +5812,14 @@ class _UniffiConverterTypeCredentialBuilder:
 
 
 class CredentialHolderProtocol(typing.Protocol):
-    def create_signature(self, bytes_to_hash: "bytes"):
+    def create_signature(
+        self, bytes_to_hash: "bytes", public_indices: "typing.List[int]"
+    ):
         raise NotImplementedError
 
-    def create_signature_with_accumulator(self, bytes_to_hash: "bytes"):
+    def create_signature_with_accumulator(
+        self, bytes_to_hash: "bytes", public_indices: "typing.List[int]"
+    ):
         raise NotImplementedError
 
     def create_updated_credential(self, identifier: "Identifier"):
@@ -5797,6 +5831,11 @@ class CredentialHolderProtocol(typing.Protocol):
         raise NotImplementedError
 
     def export_json(
+        self,
+    ):
+        raise NotImplementedError
+
+    def get_attribute_list(
         self,
     ):
         raise NotImplementedError
@@ -5824,9 +5863,6 @@ class CredentialHolderProtocol(typing.Protocol):
     def get_public_key(
         self,
     ):
-        raise NotImplementedError
-
-    def switch_at_index(self, index: "int"):
         raise NotImplementedError
 
 
@@ -5898,27 +5934,35 @@ class CredentialHolder:
         )
         return cls._make_instance_(pointer)
 
-    def create_signature(self, bytes_to_hash: "bytes") -> "NamelessSignature":
+    def create_signature(
+        self, bytes_to_hash: "bytes", public_indices: "typing.List[int]"
+    ) -> "NamelessSignature":
         _UniffiConverterBytes.check_lower(bytes_to_hash)
+
+        _UniffiConverterSequenceUInt32.check_lower(public_indices)
 
         return _UniffiConverterTypeNamelessSignature.lift(
             _uniffi_rust_call(
                 _UniffiLib.uniffi_nameless_rs_fn_method_credentialholder_create_signature,
                 self._uniffi_clone_pointer(),
                 _UniffiConverterBytes.lower(bytes_to_hash),
+                _UniffiConverterSequenceUInt32.lower(public_indices),
             )
         )
 
     def create_signature_with_accumulator(
-        self, bytes_to_hash: "bytes"
+        self, bytes_to_hash: "bytes", public_indices: "typing.List[int]"
     ) -> "NamelessSignatureWithAccumulator":
         _UniffiConverterBytes.check_lower(bytes_to_hash)
+
+        _UniffiConverterSequenceUInt32.check_lower(public_indices)
 
         return _UniffiConverterTypeNamelessSignatureWithAccumulator.lift(
             _uniffi_rust_call(
                 _UniffiLib.uniffi_nameless_rs_fn_method_credentialholder_create_signature_with_accumulator,
                 self._uniffi_clone_pointer(),
                 _UniffiConverterBytes.lower(bytes_to_hash),
+                _UniffiConverterSequenceUInt32.lower(public_indices),
             )
         )
 
@@ -5951,6 +5995,16 @@ class CredentialHolder:
             _uniffi_rust_call_with_error(
                 _UniffiConverterTypeApiError,
                 _UniffiLib.uniffi_nameless_rs_fn_method_credentialholder_export_json,
+                self._uniffi_clone_pointer(),
+            )
+        )
+
+    def get_attribute_list(
+        self,
+    ) -> "CredentialAttributeList":
+        return _UniffiConverterTypeCredentialAttributeList.lift(
+            _uniffi_rust_call(
+                _UniffiLib.uniffi_nameless_rs_fn_method_credentialholder_get_attribute_list,
                 self._uniffi_clone_pointer(),
             )
         )
@@ -6003,15 +6057,6 @@ class CredentialHolder:
                 _UniffiLib.uniffi_nameless_rs_fn_method_credentialholder_get_public_key,
                 self._uniffi_clone_pointer(),
             )
-        )
-
-    def switch_at_index(self, index: "int") -> None:
-        _UniffiConverterUInt32.check_lower(index)
-
-        _uniffi_rust_call(
-            _UniffiLib.uniffi_nameless_rs_fn_method_credentialholder_switch_at_index,
-            self._uniffi_clone_pointer(),
-            _UniffiConverterUInt32.lower(index),
         )
 
 
@@ -7538,6 +7583,7 @@ class NamelessSignature:
         credential: "Credential",
         group_parameters: "GroupParameters",
         public_key: "PublicKey",
+        public_indices: "typing.List[int]",
         bytes_to_hash: "bytes",
     ):
         """
@@ -7551,6 +7597,8 @@ class NamelessSignature:
 
         _UniffiConverterTypePublicKey.check_lower(public_key)
 
+        _UniffiConverterSequenceUInt32.check_lower(public_indices)
+
         _UniffiConverterBytes.check_lower(bytes_to_hash)
 
         self._pointer = _uniffi_rust_call(
@@ -7558,6 +7606,7 @@ class NamelessSignature:
             _UniffiConverterTypeCredential.lower(credential),
             _UniffiConverterTypeGroupParameters.lower(group_parameters),
             _UniffiConverterTypePublicKey.lower(public_key),
+            _UniffiConverterSequenceUInt32.lower(public_indices),
             _UniffiConverterBytes.lower(bytes_to_hash),
         )
 

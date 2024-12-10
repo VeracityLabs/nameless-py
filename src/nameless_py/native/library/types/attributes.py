@@ -106,7 +106,12 @@ class BaseMessageImpl:
         Args:
             value (bytes): Raw message data
             visibility (Literal["Public", "Private"]): Message visibility type
+
+        Raises:
+            ValueError: If value exceeds 32 bytes
         """
+        if len(value) > 32:
+            raise ValueError("Message value cannot exceed 32 bytes")
         self.visibility = visibility
         self.value = value
 
@@ -115,7 +120,12 @@ class BaseMessageImpl:
 
         Args:
             new_value (bytes): New raw message data
+
+        Raises:
+            ValueError: If new_value exceeds 32 bytes
         """
+        if len(new_value) > 32:
+            raise ValueError("Message value cannot exceed 32 bytes")
         self.value = new_value
 
     def to_dict(self) -> dict:
@@ -135,6 +145,14 @@ class BaseMessageImpl:
             value=list(self.value),
             attribute_type=self.visibility,
         )
+
+    def __str__(self) -> str:
+        """String representation of the message."""
+        try:
+            decoded = self.value.decode("ascii")
+            return f"{self.visibility}: {decoded}"
+        except UnicodeDecodeError:
+            return f"{self.visibility}: {HexStringUtil.bytes_to_str(self.value)}"
 
 
 class PublicMessage(BaseMessageImpl, Message):
@@ -176,6 +194,20 @@ class NativeAttributeList:
     def __init__(self) -> None:
         """Initialize empty message list."""
         self.messages: list[AttributeTypes] = []
+
+    def __str__(self) -> str:
+        """String representation of the attribute list."""
+        if not self.messages:
+            return "NativeAttributeList(empty)"
+
+        attributes = "\n".join(
+            f"  {i}: {str(msg)}" for i, msg in enumerate(self.messages)
+        )
+        return f"NativeAttributeList(\n{attributes}\n)"
+
+    def __repr__(self) -> str:
+        """Detailed string representation of the attribute list."""
+        return self.__str__()
 
     @classmethod
     def from_attribute_list(
@@ -343,7 +375,7 @@ class NativeAttributeList:
             raise AttributeTypeError("Message at index is not a PrivateMessage")
         return cast(PrivateMessage, self.messages[index])
 
-    def make_message_private(self, index: int) -> None:
+    def make_attribute_private(self, index: int) -> None:
         """Convert public message to private at specified index.
 
         Args:
