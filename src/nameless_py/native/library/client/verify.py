@@ -7,6 +7,41 @@ from pydantic import BaseModel
 import json
 
 ###
+# Exceptions
+###
+
+
+class VerifierError(Exception):
+    """Base exception for verifier errors"""
+
+    pass
+
+
+class SignatureVerificationError(VerifierError):
+    """Error verifying signature"""
+
+    pass
+
+
+class AccumulatorVerificationError(VerifierError):
+    """Error verifying accumulator"""
+
+    pass
+
+
+class AttributeListError(VerifierError):
+    """Error accessing or processing attribute list"""
+
+    pass
+
+
+class VerifierInitializationError(VerifierError):
+    """Error initializing verifier"""
+
+    pass
+
+
+###
 # Utilities And Protocols For Verifying Nameless Signatures
 ###
 
@@ -23,6 +58,8 @@ class VerifiableSignatureProtocol(Protocol):
     def get_accumulator_signature(self) -> AccumulatorSignature: ...
 
     def get_accumulator_verifier(self) -> AccumulatorVerifier: ...
+
+    def get_attribute_list(self) -> NativeAttributeList: ...
 
     def verify(
         self, public_key: PublicKey, group_parameters: GroupParameters
@@ -53,20 +90,42 @@ class VerifiableNamelessSignatureWithoutAccumulator(VerifiableSignatureProtocol)
     def get_accumulator_verifier(self) -> AccumulatorVerifier:
         return self.accumulator_verifier
 
+    def get_attribute_list(self) -> NativeAttributeList:
+        try:
+            attribute_list_json = self.signature.get_attribute_list().export_json()
+            return NativeAttributeList.from_json(attribute_list_json)
+        except ValueError as e:
+            raise AttributeListError(f"Invalid attribute list format: {e}")
+        except Exception as e:
+            raise AttributeListError(f"Failed to extract attribute list: {e}")
+
     def verify(self, public_key: PublicKey, group_parameters: GroupParameters) -> bool:
         try:
             signature = self.get_signature_of_data()
             data_hash = self.get_hash_of_data()
             accumulator_value = self.get_accumulator_value()
             accumulator_signature = self.get_accumulator_signature()
-            is_valid_accumulator = self.get_accumulator_verifier()(
-                accumulator_value, accumulator_signature
-            )
-            return is_valid_accumulator & signature.verify(
-                public_key, group_parameters, accumulator_value, data_hash
-            )
+
+            try:
+                is_valid_accumulator = self.get_accumulator_verifier()(
+                    accumulator_value, accumulator_signature
+                )
+            except Exception as e:
+                raise AccumulatorVerificationError(f"Failed to verify accumulator: {e}")
+
+            try:
+                is_valid_signature = signature.verify(
+                    public_key, group_parameters, accumulator_value, data_hash
+                )
+            except Exception as e:
+                raise SignatureVerificationError(f"Failed to verify signature: {e}")
+
+            return is_valid_accumulator & is_valid_signature
+
+        except (AccumulatorVerificationError, SignatureVerificationError):
+            raise
         except Exception as e:
-            raise RuntimeError(f"Failed to verify proof: {e}")
+            raise VerifierError(f"Unexpected error during verification: {e}")
 
 
 ### Implementation Of The VerifiableSignatureProtocol Protocol
@@ -91,20 +150,42 @@ class VerifiableNamelessSignatureWithAccumulator(VerifiableSignatureProtocol):
     def get_accumulator_verifier(self) -> AccumulatorVerifier:
         return self.accumulator_verifier
 
+    def get_attribute_list(self) -> NativeAttributeList:
+        try:
+            attribute_list_json = self.signature.get_attribute_list().export_json()
+            return NativeAttributeList.from_json(attribute_list_json)
+        except ValueError as e:
+            raise AttributeListError(f"Invalid attribute list format: {e}")
+        except Exception as e:
+            raise AttributeListError(f"Failed to extract attribute list: {e}")
+
     def verify(self, public_key: PublicKey, group_parameters: GroupParameters) -> bool:
         try:
             signature = self.get_signature_of_data()
             data_hash = self.get_hash_of_data()
             accumulator_value = self.get_accumulator_value()
             accumulator_signature = self.get_accumulator_signature()
-            is_valid_accumulator = self.get_accumulator_verifier()(
-                accumulator_value, accumulator_signature
-            )
-            return is_valid_accumulator & signature.verify(
-                public_key, group_parameters, accumulator_value, data_hash
-            )
+
+            try:
+                is_valid_accumulator = self.get_accumulator_verifier()(
+                    accumulator_value, accumulator_signature
+                )
+            except Exception as e:
+                raise AccumulatorVerificationError(f"Failed to verify accumulator: {e}")
+
+            try:
+                is_valid_signature = signature.verify(
+                    public_key, group_parameters, accumulator_value, data_hash
+                )
+            except Exception as e:
+                raise SignatureVerificationError(f"Failed to verify signature: {e}")
+
+            return is_valid_accumulator & is_valid_signature
+
+        except (AccumulatorVerificationError, SignatureVerificationError):
+            raise
         except Exception as e:
-            raise RuntimeError(f"Failed to verify proof: {e}")
+            raise VerifierError(f"Unexpected error during verification: {e}")
 
 
 ###
@@ -137,16 +218,32 @@ class ParsedSignatureAttribute(BaseModel):
 class NativeVerifier:
 
     def __init__(self, params: NativeVerifierParams) -> None:
-        self.public_key = params["public_key"]
-        self.group_parameters = params["group_parameters"]
+        try:
+            self.public_key = params["public_key"]
+            self.group_parameters = params["group_parameters"]
+        except KeyError as e:
+            raise VerifierInitializationError(f"Missing required parameter: {e}")
+        except Exception as e:
+            raise VerifierInitializationError(f"Failed to initialize verifier: {e}")
 
     def verify_signature(self, params: VerifiableSignatureObject) -> bool:
         try:
             return params.verify(self.public_key, self.group_parameters)
+        except (
+            AccumulatorVerificationError,
+            SignatureVerificationError,
+            VerifierError,
+        ):
+            raise
         except Exception as e:
-            raise RuntimeError(f"Failed to verify proof: {e}")
+            raise VerifierError(f"Unexpected error during verification: {e}")
 
     def read_attribute_list(
         self, params: VerifiableSignatureObject
     ) -> NativeAttributeList:
-        raise NotImplementedError("read_attribute_list not implemented")
+        try:
+            return params.get_attribute_list()
+        except AttributeListError:
+            raise
+        except Exception as e:
+            raise AttributeListError(f"Failed to read attribute list: {e}")

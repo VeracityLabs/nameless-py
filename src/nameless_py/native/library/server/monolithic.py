@@ -6,7 +6,53 @@ from nameless_py.native.library.types.accumulator import (
 from nameless_py.native.library.server.revoke import RevocationProtocol
 from nameless_py.native.library.server.open import OpeningProtocol
 from nameless_py.native.library.server.issue import IssuingProtocol
-from nameless_py.native.library.types.aliases import RequestedCredential
+
+
+###
+# Exceptions
+###
+
+
+class IssuerError(Exception):
+    """Base exception for issuer errors"""
+
+    pass
+
+
+class CredentialIssuanceError(IssuerError):
+    """Error issuing credentials"""
+
+    pass
+
+
+class CredentialUpdateError(IssuerError):
+    """Error updating credentials"""
+
+    pass
+
+
+class AccumulatorError(IssuerError):
+    """Error accessing accumulator store"""
+
+    pass
+
+
+class KeyAccessError(IssuerError):
+    """Error accessing keys or parameters"""
+
+    pass
+
+
+class RevocationError(IssuerError):
+    """Error revoking credentials"""
+
+    pass
+
+
+class IdentificationError(IssuerError):
+    """Error identifying users from signatures"""
+
+    pass
 
 
 class NativeMonolithicIssuer(RevocationProtocol, OpeningProtocol, IssuingProtocol):
@@ -38,22 +84,28 @@ class NativeMonolithicIssuer(RevocationProtocol, OpeningProtocol, IssuingProtoco
 
         Returns:
             New NativeMonolithicIssuer instance wrapping the provided issuer
+
+        Raises:
+            AccumulatorError: If copying accumulator values fails
         """
         instance = cls(issuer.get_num_attributes())
         instance.issuer = issuer
         instance.accumulator_store = NativeAccumulatorStore()
         instance.max_messages = instance.issuer.get_num_attributes()
 
-        # Copy accumulator values from the existing issuer
-        accumulator_store = instance.issuer.get_accumulator_store()
-        number_of_epochs = accumulator_store.get_current_epoch()
-        for epoch in range(number_of_epochs):
-            instance.accumulator_store.append(
-                NativeAccumulatorStoreEntry(
-                    accumulator_store.get_previous_accumulator(epoch)
+        try:
+            # Copy accumulator values from the existing issuer
+            accumulator_store = instance.issuer.get_accumulator_store()
+            number_of_epochs = accumulator_store.get_current_epoch()
+            for epoch in range(number_of_epochs):
+                instance.accumulator_store.append(
+                    NativeAccumulatorStoreEntry(
+                        accumulator_store.get_previous_accumulator(epoch)
+                    )
                 )
-            )
-        return instance
+            return instance
+        except Exception as e:
+            raise AccumulatorError(f"Failed to copy accumulator values: {e}")
 
     def get_issuer(self) -> MonolithicIssuer:
         """Get the underlying MonolithicIssuer instance"""
@@ -71,9 +123,9 @@ class NativeMonolithicIssuer(RevocationProtocol, OpeningProtocol, IssuingProtoco
         Returns:
             List of public attributes from the request
         """
-        return credential_request.get_public_attributes()
+        return credential_request.get_attribute_list()
 
-    def issue(self, credential_request: CredentialRequest) -> RequestedCredential:
+    def issue(self, credential_request: CredentialRequest) -> PartialCredential:
         """
         Issue a credential in response to a request.
 
@@ -81,32 +133,35 @@ class NativeMonolithicIssuer(RevocationProtocol, OpeningProtocol, IssuingProtoco
             credential_request: The credential request to process
 
         Returns:
-            HolderBuilder for constructing the credential
+            PartialCredential for constructing the credential
 
         Raises:
-            RuntimeError: If credential issuance fails
+            CredentialIssuanceError: If credential issuance fails
         """
         try:
             # request.verify(self.issuer.get_group_parameters()) # TODO: Should We Check This?
             return self.issuer.issue(credential_request)
         except Exception as e:
-            raise RuntimeError(f"Failed to produce signature: {e}")
+            raise CredentialIssuanceError(f"Failed to issue credential: {e}")
 
-    def update_credential(self, request: None) -> None:
+    def update_credential(self, current_identifier: Identifier) -> Identifier:
         """
-        Update an existing credential (not implemented).
+        Update an existing credential.
 
         Args:
-            request: Credential update request
+            current_identifier: Current identifier to update
+
+        Returns:
+            Updated identifier
 
         Raises:
-            NotImplementedError: Always, as this is not yet implemented
+            CredentialUpdateError: If update fails
         """
         try:
-            # TODO: I Haven't Figured Out How To Update Credentials Yet!
-            raise NotImplementedError
+            accumulator_store = self.issuer.get_accumulator_store()
+            return accumulator_store.get_updated_identifier(current_identifier)
         except Exception as e:
-            raise RuntimeError(f"Failed to receive credential update request: {e}")
+            raise CredentialUpdateError(f"Failed to update credential: {e}")
 
     def get_current_epoch(self) -> int:
         """
@@ -116,12 +171,12 @@ class NativeMonolithicIssuer(RevocationProtocol, OpeningProtocol, IssuingProtoco
             Current epoch number
 
         Raises:
-            RuntimeError: If retrieving epoch fails
+            AccumulatorError: If retrieving epoch fails
         """
         try:
             return self.issuer.get_accumulator_store().get_current_epoch()
         except Exception as e:
-            raise RuntimeError(f"Failed to get current epoch: {e}")
+            raise AccumulatorError(f"Failed to get current epoch: {e}")
 
     def get_current_accumulator(self) -> AccumulatorValue:
         """
@@ -131,12 +186,12 @@ class NativeMonolithicIssuer(RevocationProtocol, OpeningProtocol, IssuingProtoco
             Current accumulator value
 
         Raises:
-            RuntimeError: If retrieving accumulator fails
+            AccumulatorError: If retrieving accumulator fails
         """
         try:
             return self.issuer.get_accumulator_store().get_current_accumulator()
         except Exception as e:
-            raise RuntimeError(f"Failed to get accumulator entry: {e}")
+            raise AccumulatorError(f"Failed to get current accumulator: {e}")
 
     def _get_accumulator_store(self) -> NativeAccumulatorStore:
         """Get the native accumulator store"""
@@ -150,12 +205,12 @@ class NativeMonolithicIssuer(RevocationProtocol, OpeningProtocol, IssuingProtoco
             Issuer's public key
 
         Raises:
-            RuntimeError: If retrieving public key fails
+            KeyAccessError: If retrieving public key fails
         """
         try:
             return self.issuer.get_public_key()
         except Exception as e:
-            raise RuntimeError(f"Failed to get server public key: {e}")
+            raise KeyAccessError(f"Failed to get public key: {e}")
 
     def get_group_parameters(self) -> GroupParameters:
         """
@@ -165,12 +220,12 @@ class NativeMonolithicIssuer(RevocationProtocol, OpeningProtocol, IssuingProtoco
             Group parameters
 
         Raises:
-            RuntimeError: If retrieving parameters fails
+            KeyAccessError: If retrieving parameters fails
         """
         try:
             return self.issuer.get_group_parameters()
         except Exception as e:
-            raise RuntimeError(f"Failed to get server group parameters: {e}")
+            raise KeyAccessError(f"Failed to get group parameters: {e}")
 
     def get_max_attributes(self) -> int:
         """Get the maximum number of attributes supported by this issuer"""
@@ -184,13 +239,13 @@ class NativeMonolithicIssuer(RevocationProtocol, OpeningProtocol, IssuingProtoco
             identifier: Identifier of the user to revoke
 
         Raises:
-            RuntimeError: If revocation fails
+            RevocationError: If revocation fails
         """
         try:
             self.issuer.revoke_from_identifier(identifier)
             return
         except Exception as e:
-            raise RuntimeError(f"Failed to revoke user: {e}")
+            raise RevocationError(f"Failed to revoke credential: {e}")
 
     def recover_identifier_from_signature(
         self, signature: NamelessSignature
@@ -199,15 +254,15 @@ class NativeMonolithicIssuer(RevocationProtocol, OpeningProtocol, IssuingProtoco
         Recover a user's identity from their signature.
 
         Args:
-            nameless_signature: The signature to identify
+            signature: The signature to identify
 
         Returns:
             Identifier of the user who created the signature
 
         Raises:
-            RuntimeError: If identification fails
+            IdentificationError: If identification fails
         """
         try:
             return self.issuer.recover_identifier(signature)
         except Exception as e:
-            raise RuntimeError(f"Failed to recover user ID: {e}")
+            raise IdentificationError(f"Failed to recover identifier: {e}")

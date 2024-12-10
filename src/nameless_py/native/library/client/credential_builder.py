@@ -5,8 +5,36 @@ from nameless_py.native.library.types.attributes import (
     PrivateMessage,
 )
 from nameless_py.native.library.client.credential_holder import NativeCredentialHolder
-from nameless_py.native.library.types.aliases import RequestedCredential
 from typing import List, TypedDict, Optional
+
+###
+# Exceptions
+###
+
+
+class CredentialBuilderError(Exception):
+    """Base exception for credential builder errors"""
+
+    pass
+
+
+class AttributeConversionError(CredentialBuilderError):
+    """Error converting between attribute types"""
+
+    pass
+
+
+class CredentialRequestError(CredentialBuilderError):
+    """Error generating credential request"""
+
+    pass
+
+
+class HolderCreationError(CredentialBuilderError):
+    """Error creating credential holder"""
+
+    pass
+
 
 ###
 # Utility Functions
@@ -25,12 +53,18 @@ def set_credential_attribute_type(
 
     Returns:
         The CredentialAttribute with the desired AttributeType
-    """
-    current_attribute_type: AttributeType = credential_attribute.get_type()
-    if current_attribute_type != attribute_type:
-        credential_attribute.switch()
 
-    return credential_attribute
+    Raises:
+        AttributeConversionError: If switching attribute type fails
+    """
+    try:
+        current_attribute_type: AttributeType = credential_attribute.get_type()
+        if current_attribute_type != attribute_type:
+            credential_attribute.switch()
+
+        return credential_attribute
+    except Exception as e:
+        raise AttributeConversionError(f"Failed to set attribute type: {e}")
 
 
 def convert_message_list(
@@ -44,28 +78,40 @@ def convert_message_list(
 
     Returns:
         A list of CredentialAttributes with appropriate attribute types
+
+    Raises:
+        AttributeConversionError: If conversion of any attribute fails
     """
-    # Extract public and private messages from the NativeAttributeList
-    public_messages: List[PublicMessage] = messages.get_public_attributes()
-    private_messages: List[PrivateMessage] = messages.get_private_attributes()
+    try:
+        # Extract public and private messages from the NativeAttributeList
+        public_messages: List[PublicMessage] = messages.get_public_attributes()
+        private_messages: List[PrivateMessage] = messages.get_private_attributes()
 
-    credential_attributes: List[CredentialAttribute] = []
+        credential_attributes: List[CredentialAttribute] = []
 
-    # Convert public messages to CredentialAttributes
-    for public_message in public_messages:
-        attribute = CredentialAttribute.from_be_bytes_mod_order(public_message.value)
-        credential_attributes.append(
-            set_credential_attribute_type(AttributeType.PUBLIC, attribute)
-        )
+        # Convert public messages to CredentialAttributes
+        for public_message in public_messages:
+            attribute = CredentialAttribute.from_be_bytes_mod_order(
+                public_message.value
+            )
+            credential_attributes.append(
+                set_credential_attribute_type(AttributeType.PUBLIC, attribute)
+            )
 
-    # Convert private messages to CredentialAttributes
-    for private_message in private_messages:
-        attribute = CredentialAttribute.from_be_bytes_mod_order(private_message.value)
-        credential_attributes.append(
-            set_credential_attribute_type(AttributeType.PRIVATE, attribute)
-        )
+        # Convert private messages to CredentialAttributes
+        for private_message in private_messages:
+            attribute = CredentialAttribute.from_be_bytes_mod_order(
+                private_message.value
+            )
+            credential_attributes.append(
+                set_credential_attribute_type(AttributeType.PRIVATE, attribute)
+            )
 
-    return credential_attributes
+        return credential_attributes
+    except AttributeConversionError:
+        raise
+    except Exception as e:
+        raise AttributeConversionError(f"Failed to convert message list: {e}")
 
 
 ###
@@ -96,7 +142,8 @@ class NativeCredentialBuilder:
             messages: A NativeAttributeList containing the credential attributes
 
         Raises:
-            RuntimeError: If initialization fails
+            CredentialBuilderError: If initialization fails
+            AttributeConversionError: If attribute conversion fails
         """
         try:
             self.group_parameters: GroupParameters = params["group_parameters"]
@@ -108,8 +155,10 @@ class NativeCredentialBuilder:
             self.credential_attributes = CredentialAttributeList(
                 convert_message_list(params["attribute_list"])
             )
+        except AttributeConversionError:
+            raise
         except Exception as e:
-            raise RuntimeError(f"Failed to initialize holder builder: {e}")
+            raise CredentialBuilderError(f"Failed to initialize holder builder: {e}")
 
     def request_credential(self) -> CredentialRequest:
         """
@@ -119,37 +168,37 @@ class NativeCredentialBuilder:
             A CredentialRequest object containing the request data
 
         Raises:
-            RuntimeError: If request preparation fails
+            CredentialRequestError: If request preparation fails
         """
         try:
             return self.credential_attributes.clone_to_credential_request(
                 self.group_parameters, self.credential_secret
             )
         except Exception as e:
-            raise RuntimeError(f"Failed to prepare credential request: {e}")
+            raise CredentialRequestError(f"Failed to prepare credential request: {e}")
 
     def create_holder(
-        self, holder_builder: RequestedCredential
+        self, partial_credential: PartialCredential
     ) -> "NativeCredentialHolder":
         """
         Process the issuer's response to create a NativeCredentialHolder instance.
 
         Args:
-            holder_builder: The HolderBuilder containing the issuer's response
+            holder_builder: The PartialCredential containing the issuer's response
 
         Returns:
             A new NativeCredentialHolder instance
 
         Raises:
-            RuntimeError: If holder creation fails
+            HolderCreationError: If holder creation fails
         """
         try:
             return NativeCredentialHolder(
                 {
-                    "holder_builder": holder_builder,
+                    "holder_builder": partial_credential,
                     "credential_attributes": self.credential_attributes,
                     "credential_secret": self.credential_secret,
                 }
             )
         except Exception as e:
-            raise RuntimeError(f"Failed to process credential response: {e}")
+            raise HolderCreationError(f"Failed to process credential response: {e}")

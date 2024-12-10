@@ -552,8 +552,8 @@ def _uniffi_check_api_checksums(lib):
             "UniFFI API checksum mismatch: try cleaning and rebuilding your project"
         )
     if (
-        lib.uniffi_nameless_rs_checksum_method_accumulatorstore_request_updated_identifier()
-        != 56286
+        lib.uniffi_nameless_rs_checksum_method_accumulatorstore_get_updated_identifier()
+        != 60852
     ):
         raise InternalError(
             "UniFFI API checksum mismatch: try cleaning and rebuilding your project"
@@ -573,10 +573,7 @@ def _uniffi_check_api_checksums(lib):
         raise InternalError(
             "UniFFI API checksum mismatch: try cleaning and rebuilding your project"
         )
-    if (
-        lib.uniffi_nameless_rs_checksum_method_credential_get_credential_attribute_list()
-        != 11256
-    ):
+    if lib.uniffi_nameless_rs_checksum_method_credential_get_attribute_list() != 28830:
         raise InternalError(
             "UniFFI API checksum mismatch: try cleaning and rebuilding your project"
         )
@@ -623,6 +620,93 @@ def _uniffi_check_api_checksums(lib):
         raise InternalError(
             "UniFFI API checksum mismatch: try cleaning and rebuilding your project"
         )
+    if lib.uniffi_nameless_rs_checksum_method_credentialbuilder_export_cbor() != 19016:
+        raise InternalError(
+            "UniFFI API checksum mismatch: try cleaning and rebuilding your project"
+        )
+    if lib.uniffi_nameless_rs_checksum_method_credentialbuilder_export_json() != 62516:
+        raise InternalError(
+            "UniFFI API checksum mismatch: try cleaning and rebuilding your project"
+        )
+    if lib.uniffi_nameless_rs_checksum_method_credentialbuilder_finalize() != 36648:
+        raise InternalError(
+            "UniFFI API checksum mismatch: try cleaning and rebuilding your project"
+        )
+    if (
+        lib.uniffi_nameless_rs_checksum_method_credentialbuilder_generate_credential_request()
+        != 55672
+    ):
+        raise InternalError(
+            "UniFFI API checksum mismatch: try cleaning and rebuilding your project"
+        )
+    if (
+        lib.uniffi_nameless_rs_checksum_method_credentialholder_create_signature()
+        != 29222
+    ):
+        raise InternalError(
+            "UniFFI API checksum mismatch: try cleaning and rebuilding your project"
+        )
+    if (
+        lib.uniffi_nameless_rs_checksum_method_credentialholder_create_signature_with_accumulator()
+        != 35259
+    ):
+        raise InternalError(
+            "UniFFI API checksum mismatch: try cleaning and rebuilding your project"
+        )
+    if (
+        lib.uniffi_nameless_rs_checksum_method_credentialholder_create_updated_credential()
+        != 47350
+    ):
+        raise InternalError(
+            "UniFFI API checksum mismatch: try cleaning and rebuilding your project"
+        )
+    if lib.uniffi_nameless_rs_checksum_method_credentialholder_export_cbor() != 9436:
+        raise InternalError(
+            "UniFFI API checksum mismatch: try cleaning and rebuilding your project"
+        )
+    if lib.uniffi_nameless_rs_checksum_method_credentialholder_export_json() != 42421:
+        raise InternalError(
+            "UniFFI API checksum mismatch: try cleaning and rebuilding your project"
+        )
+    if lib.uniffi_nameless_rs_checksum_method_credentialholder_get_credential() != 9139:
+        raise InternalError(
+            "UniFFI API checksum mismatch: try cleaning and rebuilding your project"
+        )
+    if (
+        lib.uniffi_nameless_rs_checksum_method_credentialholder_get_group_parameters()
+        != 4342
+    ):
+        raise InternalError(
+            "UniFFI API checksum mismatch: try cleaning and rebuilding your project"
+        )
+    if (
+        lib.uniffi_nameless_rs_checksum_method_credentialholder_get_identifier()
+        != 18499
+    ):
+        raise InternalError(
+            "UniFFI API checksum mismatch: try cleaning and rebuilding your project"
+        )
+    if (
+        lib.uniffi_nameless_rs_checksum_method_credentialholder_get_last_valid_accumulator()
+        != 41599
+    ):
+        raise InternalError(
+            "UniFFI API checksum mismatch: try cleaning and rebuilding your project"
+        )
+    if (
+        lib.uniffi_nameless_rs_checksum_method_credentialholder_get_public_key()
+        != 50760
+    ):
+        raise InternalError(
+            "UniFFI API checksum mismatch: try cleaning and rebuilding your project"
+        )
+    if (
+        lib.uniffi_nameless_rs_checksum_method_credentialholder_switch_at_index()
+        != 35582
+    ):
+        raise InternalError(
+            "UniFFI API checksum mismatch: try cleaning and rebuilding your project"
+        )
     if lib.uniffi_nameless_rs_checksum_method_credentialrequest_export_cbor() != 811:
         raise InternalError(
             "UniFFI API checksum mismatch: try cleaning and rebuilding your project"
@@ -632,8 +716,8 @@ def _uniffi_check_api_checksums(lib):
             "UniFFI API checksum mismatch: try cleaning and rebuilding your project"
         )
     if (
-        lib.uniffi_nameless_rs_checksum_method_credentialrequest_get_public_attributes()
-        != 50372
+        lib.uniffi_nameless_rs_checksum_method_credentialrequest_get_attribute_list()
+        != 42608
     ):
         raise InternalError(
             "UniFFI API checksum mismatch: try cleaning and rebuilding your project"
@@ -683,52 +767,6 @@ def _uniffi_check_api_checksums(lib):
             "UniFFI API checksum mismatch: try cleaning and rebuilding your project"
         )
     if lib.uniffi_nameless_rs_checksum_method_groupparameters_export_json() != 41178:
-        raise InternalError(
-            "UniFFI API checksum mismatch: try cleaning and rebuilding your project"
-        )
-    if lib.uniffi_nameless_rs_checksum_method_holder_create_signature() != 60268:
-        raise InternalError(
-            "UniFFI API checksum mismatch: try cleaning and rebuilding your project"
-        )
-    if (
-        lib.uniffi_nameless_rs_checksum_method_holder_create_signature_with_accumulator()
-        != 9351
-    ):
-        raise InternalError(
-            "UniFFI API checksum mismatch: try cleaning and rebuilding your project"
-        )
-    if lib.uniffi_nameless_rs_checksum_method_holder_export_cbor() != 50571:
-        raise InternalError(
-            "UniFFI API checksum mismatch: try cleaning and rebuilding your project"
-        )
-    if lib.uniffi_nameless_rs_checksum_method_holder_export_json() != 11210:
-        raise InternalError(
-            "UniFFI API checksum mismatch: try cleaning and rebuilding your project"
-        )
-    if lib.uniffi_nameless_rs_checksum_method_holder_get_credential() != 62261:
-        raise InternalError(
-            "UniFFI API checksum mismatch: try cleaning and rebuilding your project"
-        )
-    if lib.uniffi_nameless_rs_checksum_method_holder_get_group_parameters() != 45552:
-        raise InternalError(
-            "UniFFI API checksum mismatch: try cleaning and rebuilding your project"
-        )
-    if (
-        lib.uniffi_nameless_rs_checksum_method_holder_get_last_valid_accumulator()
-        != 41781
-    ):
-        raise InternalError(
-            "UniFFI API checksum mismatch: try cleaning and rebuilding your project"
-        )
-    if lib.uniffi_nameless_rs_checksum_method_holder_get_public_key() != 1728:
-        raise InternalError(
-            "UniFFI API checksum mismatch: try cleaning and rebuilding your project"
-        )
-    if lib.uniffi_nameless_rs_checksum_method_holderbuilder_export_cbor() != 7276:
-        raise InternalError(
-            "UniFFI API checksum mismatch: try cleaning and rebuilding your project"
-        )
-    if lib.uniffi_nameless_rs_checksum_method_holderbuilder_export_json() != 63464:
         raise InternalError(
             "UniFFI API checksum mismatch: try cleaning and rebuilding your project"
         )
@@ -796,7 +834,7 @@ def _uniffi_check_api_checksums(lib):
         raise InternalError(
             "UniFFI API checksum mismatch: try cleaning and rebuilding your project"
         )
-    if lib.uniffi_nameless_rs_checksum_method_monolithicissuer_issue() != 41425:
+    if lib.uniffi_nameless_rs_checksum_method_monolithicissuer_issue() != 17435:
         raise InternalError(
             "UniFFI API checksum mismatch: try cleaning and rebuilding your project"
         )
@@ -830,8 +868,8 @@ def _uniffi_check_api_checksums(lib):
             "UniFFI API checksum mismatch: try cleaning and rebuilding your project"
         )
     if (
-        lib.uniffi_nameless_rs_checksum_method_namelesssignature_get_public_attributes()
-        != 61606
+        lib.uniffi_nameless_rs_checksum_method_namelesssignature_get_attribute_list()
+        != 30949
     ):
         raise InternalError(
             "UniFFI API checksum mismatch: try cleaning and rebuilding your project"
@@ -862,6 +900,13 @@ def _uniffi_check_api_checksums(lib):
             "UniFFI API checksum mismatch: try cleaning and rebuilding your project"
         )
     if (
+        lib.uniffi_nameless_rs_checksum_method_namelesssignaturewithaccumulator_get_attribute_list()
+        != 29301
+    ):
+        raise InternalError(
+            "UniFFI API checksum mismatch: try cleaning and rebuilding your project"
+        )
+    if (
         lib.uniffi_nameless_rs_checksum_method_namelesssignaturewithaccumulator_get_signature()
         != 45052
     ):
@@ -884,6 +929,18 @@ def _uniffi_check_api_checksums(lib):
             "UniFFI API checksum mismatch: try cleaning and rebuilding your project"
         )
     if lib.uniffi_nameless_rs_checksum_method_openingkey_open() != 25494:
+        raise InternalError(
+            "UniFFI API checksum mismatch: try cleaning and rebuilding your project"
+        )
+    if lib.uniffi_nameless_rs_checksum_method_partialcredential_export_cbor() != 28612:
+        raise InternalError(
+            "UniFFI API checksum mismatch: try cleaning and rebuilding your project"
+        )
+    if lib.uniffi_nameless_rs_checksum_method_partialcredential_export_json() != 16032:
+        raise InternalError(
+            "UniFFI API checksum mismatch: try cleaning and rebuilding your project"
+        )
+    if lib.uniffi_nameless_rs_checksum_method_partialcredential_validate() != 17033:
         raise InternalError(
             "UniFFI API checksum mismatch: try cleaning and rebuilding your project"
         )
@@ -1139,6 +1196,49 @@ def _uniffi_check_api_checksums(lib):
             "UniFFI API checksum mismatch: try cleaning and rebuilding your project"
         )
     if (
+        lib.uniffi_nameless_rs_checksum_constructor_credentialbuilder_import_cbor()
+        != 62498
+    ):
+        raise InternalError(
+            "UniFFI API checksum mismatch: try cleaning and rebuilding your project"
+        )
+    if (
+        lib.uniffi_nameless_rs_checksum_constructor_credentialbuilder_import_json()
+        != 26206
+    ):
+        raise InternalError(
+            "UniFFI API checksum mismatch: try cleaning and rebuilding your project"
+        )
+    if lib.uniffi_nameless_rs_checksum_constructor_credentialbuilder_new() != 59030:
+        raise InternalError(
+            "UniFFI API checksum mismatch: try cleaning and rebuilding your project"
+        )
+    if (
+        lib.uniffi_nameless_rs_checksum_constructor_credentialbuilder_new_with_secret()
+        != 3389
+    ):
+        raise InternalError(
+            "UniFFI API checksum mismatch: try cleaning and rebuilding your project"
+        )
+    if (
+        lib.uniffi_nameless_rs_checksum_constructor_credentialholder_import_cbor()
+        != 34470
+    ):
+        raise InternalError(
+            "UniFFI API checksum mismatch: try cleaning and rebuilding your project"
+        )
+    if (
+        lib.uniffi_nameless_rs_checksum_constructor_credentialholder_import_json()
+        != 41267
+    ):
+        raise InternalError(
+            "UniFFI API checksum mismatch: try cleaning and rebuilding your project"
+        )
+    if lib.uniffi_nameless_rs_checksum_constructor_credentialholder_new() != 40392:
+        raise InternalError(
+            "UniFFI API checksum mismatch: try cleaning and rebuilding your project"
+        )
+    if (
         lib.uniffi_nameless_rs_checksum_constructor_credentialrequest_import_cbor()
         != 8022
     ):
@@ -1221,26 +1321,6 @@ def _uniffi_check_api_checksums(lib):
             "UniFFI API checksum mismatch: try cleaning and rebuilding your project"
         )
     if lib.uniffi_nameless_rs_checksum_constructor_groupparameters_new() != 63643:
-        raise InternalError(
-            "UniFFI API checksum mismatch: try cleaning and rebuilding your project"
-        )
-    if lib.uniffi_nameless_rs_checksum_constructor_holder_import_cbor() != 62866:
-        raise InternalError(
-            "UniFFI API checksum mismatch: try cleaning and rebuilding your project"
-        )
-    if lib.uniffi_nameless_rs_checksum_constructor_holder_import_json() != 6708:
-        raise InternalError(
-            "UniFFI API checksum mismatch: try cleaning and rebuilding your project"
-        )
-    if lib.uniffi_nameless_rs_checksum_constructor_holder_new() != 32598:
-        raise InternalError(
-            "UniFFI API checksum mismatch: try cleaning and rebuilding your project"
-        )
-    if lib.uniffi_nameless_rs_checksum_constructor_holderbuilder_import_cbor() != 21114:
-        raise InternalError(
-            "UniFFI API checksum mismatch: try cleaning and rebuilding your project"
-        )
-    if lib.uniffi_nameless_rs_checksum_constructor_holderbuilder_import_json() != 56624:
         raise InternalError(
             "UniFFI API checksum mismatch: try cleaning and rebuilding your project"
         )
@@ -1330,6 +1410,20 @@ def _uniffi_check_api_checksums(lib):
             "UniFFI API checksum mismatch: try cleaning and rebuilding your project"
         )
     if lib.uniffi_nameless_rs_checksum_constructor_openingkey_new() != 64829:
+        raise InternalError(
+            "UniFFI API checksum mismatch: try cleaning and rebuilding your project"
+        )
+    if (
+        lib.uniffi_nameless_rs_checksum_constructor_partialcredential_import_cbor()
+        != 57464
+    ):
+        raise InternalError(
+            "UniFFI API checksum mismatch: try cleaning and rebuilding your project"
+        )
+    if (
+        lib.uniffi_nameless_rs_checksum_constructor_partialcredential_import_json()
+        != 17577
+    ):
         raise InternalError(
             "UniFFI API checksum mismatch: try cleaning and rebuilding your project"
         )
@@ -1779,12 +1873,12 @@ _UniffiLib.uniffi_nameless_rs_fn_method_accumulatorstore_get_previous_accumulato
 _UniffiLib.uniffi_nameless_rs_fn_method_accumulatorstore_get_previous_accumulator.restype = (
     ctypes.c_void_p
 )
-_UniffiLib.uniffi_nameless_rs_fn_method_accumulatorstore_request_updated_identifier.argtypes = (
+_UniffiLib.uniffi_nameless_rs_fn_method_accumulatorstore_get_updated_identifier.argtypes = (
     ctypes.c_void_p,
     ctypes.c_void_p,
     ctypes.POINTER(_UniffiRustCallStatus),
 )
-_UniffiLib.uniffi_nameless_rs_fn_method_accumulatorstore_request_updated_identifier.restype = (
+_UniffiLib.uniffi_nameless_rs_fn_method_accumulatorstore_get_updated_identifier.restype = (
     ctypes.c_void_p
 )
 _UniffiLib.uniffi_nameless_rs_fn_method_accumulatorstore_revoke_from_identifier.argtypes = (
@@ -1855,11 +1949,11 @@ _UniffiLib.uniffi_nameless_rs_fn_free_credential.argtypes = (
     ctypes.POINTER(_UniffiRustCallStatus),
 )
 _UniffiLib.uniffi_nameless_rs_fn_free_credential.restype = None
-_UniffiLib.uniffi_nameless_rs_fn_method_credential_get_credential_attribute_list.argtypes = (
+_UniffiLib.uniffi_nameless_rs_fn_method_credential_get_attribute_list.argtypes = (
     ctypes.c_void_p,
     ctypes.POINTER(_UniffiRustCallStatus),
 )
-_UniffiLib.uniffi_nameless_rs_fn_method_credential_get_credential_attribute_list.restype = (
+_UniffiLib.uniffi_nameless_rs_fn_method_credential_get_attribute_list.restype = (
     ctypes.c_void_p
 )
 _UniffiLib.uniffi_nameless_rs_fn_clone_credentialattribute.argtypes = (
@@ -2052,6 +2146,187 @@ _UniffiLib.uniffi_nameless_rs_fn_method_credentialattributelist_export_json.argt
 _UniffiLib.uniffi_nameless_rs_fn_method_credentialattributelist_export_json.restype = (
     _UniffiRustBuffer
 )
+_UniffiLib.uniffi_nameless_rs_fn_clone_credentialbuilder.argtypes = (
+    ctypes.c_void_p,
+    ctypes.POINTER(_UniffiRustCallStatus),
+)
+_UniffiLib.uniffi_nameless_rs_fn_clone_credentialbuilder.restype = ctypes.c_void_p
+_UniffiLib.uniffi_nameless_rs_fn_free_credentialbuilder.argtypes = (
+    ctypes.c_void_p,
+    ctypes.POINTER(_UniffiRustCallStatus),
+)
+_UniffiLib.uniffi_nameless_rs_fn_free_credentialbuilder.restype = None
+_UniffiLib.uniffi_nameless_rs_fn_constructor_credentialbuilder_import_cbor.argtypes = (
+    _UniffiRustBuffer,
+    ctypes.POINTER(_UniffiRustCallStatus),
+)
+_UniffiLib.uniffi_nameless_rs_fn_constructor_credentialbuilder_import_cbor.restype = (
+    ctypes.c_void_p
+)
+_UniffiLib.uniffi_nameless_rs_fn_constructor_credentialbuilder_import_json.argtypes = (
+    _UniffiRustBuffer,
+    ctypes.POINTER(_UniffiRustCallStatus),
+)
+_UniffiLib.uniffi_nameless_rs_fn_constructor_credentialbuilder_import_json.restype = (
+    ctypes.c_void_p
+)
+_UniffiLib.uniffi_nameless_rs_fn_constructor_credentialbuilder_new.argtypes = (
+    ctypes.c_void_p,
+    ctypes.POINTER(_UniffiRustCallStatus),
+)
+_UniffiLib.uniffi_nameless_rs_fn_constructor_credentialbuilder_new.restype = (
+    ctypes.c_void_p
+)
+_UniffiLib.uniffi_nameless_rs_fn_constructor_credentialbuilder_new_with_secret.argtypes = (
+    ctypes.c_void_p,
+    ctypes.c_void_p,
+    ctypes.POINTER(_UniffiRustCallStatus),
+)
+_UniffiLib.uniffi_nameless_rs_fn_constructor_credentialbuilder_new_with_secret.restype = (
+    ctypes.c_void_p
+)
+_UniffiLib.uniffi_nameless_rs_fn_method_credentialbuilder_export_cbor.argtypes = (
+    ctypes.c_void_p,
+    ctypes.POINTER(_UniffiRustCallStatus),
+)
+_UniffiLib.uniffi_nameless_rs_fn_method_credentialbuilder_export_cbor.restype = (
+    _UniffiRustBuffer
+)
+_UniffiLib.uniffi_nameless_rs_fn_method_credentialbuilder_export_json.argtypes = (
+    ctypes.c_void_p,
+    ctypes.POINTER(_UniffiRustCallStatus),
+)
+_UniffiLib.uniffi_nameless_rs_fn_method_credentialbuilder_export_json.restype = (
+    _UniffiRustBuffer
+)
+_UniffiLib.uniffi_nameless_rs_fn_method_credentialbuilder_finalize.argtypes = (
+    ctypes.c_void_p,
+    ctypes.c_void_p,
+    ctypes.POINTER(_UniffiRustCallStatus),
+)
+_UniffiLib.uniffi_nameless_rs_fn_method_credentialbuilder_finalize.restype = (
+    ctypes.c_void_p
+)
+_UniffiLib.uniffi_nameless_rs_fn_method_credentialbuilder_generate_credential_request.argtypes = (
+    ctypes.c_void_p,
+    ctypes.c_void_p,
+    ctypes.POINTER(_UniffiRustCallStatus),
+)
+_UniffiLib.uniffi_nameless_rs_fn_method_credentialbuilder_generate_credential_request.restype = (
+    ctypes.c_void_p
+)
+_UniffiLib.uniffi_nameless_rs_fn_clone_credentialholder.argtypes = (
+    ctypes.c_void_p,
+    ctypes.POINTER(_UniffiRustCallStatus),
+)
+_UniffiLib.uniffi_nameless_rs_fn_clone_credentialholder.restype = ctypes.c_void_p
+_UniffiLib.uniffi_nameless_rs_fn_free_credentialholder.argtypes = (
+    ctypes.c_void_p,
+    ctypes.POINTER(_UniffiRustCallStatus),
+)
+_UniffiLib.uniffi_nameless_rs_fn_free_credentialholder.restype = None
+_UniffiLib.uniffi_nameless_rs_fn_constructor_credentialholder_import_cbor.argtypes = (
+    _UniffiRustBuffer,
+    ctypes.POINTER(_UniffiRustCallStatus),
+)
+_UniffiLib.uniffi_nameless_rs_fn_constructor_credentialholder_import_cbor.restype = (
+    ctypes.c_void_p
+)
+_UniffiLib.uniffi_nameless_rs_fn_constructor_credentialholder_import_json.argtypes = (
+    _UniffiRustBuffer,
+    ctypes.POINTER(_UniffiRustCallStatus),
+)
+_UniffiLib.uniffi_nameless_rs_fn_constructor_credentialholder_import_json.restype = (
+    ctypes.c_void_p
+)
+_UniffiLib.uniffi_nameless_rs_fn_constructor_credentialholder_new.argtypes = (
+    ctypes.c_void_p,
+    ctypes.c_void_p,
+    ctypes.c_void_p,
+    ctypes.POINTER(_UniffiRustCallStatus),
+)
+_UniffiLib.uniffi_nameless_rs_fn_constructor_credentialholder_new.restype = (
+    ctypes.c_void_p
+)
+_UniffiLib.uniffi_nameless_rs_fn_method_credentialholder_create_signature.argtypes = (
+    ctypes.c_void_p,
+    _UniffiRustBuffer,
+    ctypes.POINTER(_UniffiRustCallStatus),
+)
+_UniffiLib.uniffi_nameless_rs_fn_method_credentialholder_create_signature.restype = (
+    ctypes.c_void_p
+)
+_UniffiLib.uniffi_nameless_rs_fn_method_credentialholder_create_signature_with_accumulator.argtypes = (
+    ctypes.c_void_p,
+    _UniffiRustBuffer,
+    ctypes.POINTER(_UniffiRustCallStatus),
+)
+_UniffiLib.uniffi_nameless_rs_fn_method_credentialholder_create_signature_with_accumulator.restype = (
+    ctypes.c_void_p
+)
+_UniffiLib.uniffi_nameless_rs_fn_method_credentialholder_create_updated_credential.argtypes = (
+    ctypes.c_void_p,
+    ctypes.c_void_p,
+    ctypes.POINTER(_UniffiRustCallStatus),
+)
+_UniffiLib.uniffi_nameless_rs_fn_method_credentialholder_create_updated_credential.restype = (
+    ctypes.c_void_p
+)
+_UniffiLib.uniffi_nameless_rs_fn_method_credentialholder_export_cbor.argtypes = (
+    ctypes.c_void_p,
+    ctypes.POINTER(_UniffiRustCallStatus),
+)
+_UniffiLib.uniffi_nameless_rs_fn_method_credentialholder_export_cbor.restype = (
+    _UniffiRustBuffer
+)
+_UniffiLib.uniffi_nameless_rs_fn_method_credentialholder_export_json.argtypes = (
+    ctypes.c_void_p,
+    ctypes.POINTER(_UniffiRustCallStatus),
+)
+_UniffiLib.uniffi_nameless_rs_fn_method_credentialholder_export_json.restype = (
+    _UniffiRustBuffer
+)
+_UniffiLib.uniffi_nameless_rs_fn_method_credentialholder_get_credential.argtypes = (
+    ctypes.c_void_p,
+    ctypes.POINTER(_UniffiRustCallStatus),
+)
+_UniffiLib.uniffi_nameless_rs_fn_method_credentialholder_get_credential.restype = (
+    ctypes.c_void_p
+)
+_UniffiLib.uniffi_nameless_rs_fn_method_credentialholder_get_group_parameters.argtypes = (
+    ctypes.c_void_p,
+    ctypes.POINTER(_UniffiRustCallStatus),
+)
+_UniffiLib.uniffi_nameless_rs_fn_method_credentialholder_get_group_parameters.restype = (
+    ctypes.c_void_p
+)
+_UniffiLib.uniffi_nameless_rs_fn_method_credentialholder_get_identifier.argtypes = (
+    ctypes.c_void_p,
+    ctypes.POINTER(_UniffiRustCallStatus),
+)
+_UniffiLib.uniffi_nameless_rs_fn_method_credentialholder_get_identifier.restype = (
+    ctypes.c_void_p
+)
+_UniffiLib.uniffi_nameless_rs_fn_method_credentialholder_get_last_valid_accumulator.argtypes = (
+    ctypes.c_void_p,
+    ctypes.POINTER(_UniffiRustCallStatus),
+)
+_UniffiLib.uniffi_nameless_rs_fn_method_credentialholder_get_last_valid_accumulator.restype = (
+    ctypes.c_void_p
+)
+_UniffiLib.uniffi_nameless_rs_fn_method_credentialholder_get_public_key.argtypes = (
+    ctypes.c_void_p,
+    ctypes.POINTER(_UniffiRustCallStatus),
+)
+_UniffiLib.uniffi_nameless_rs_fn_method_credentialholder_get_public_key.restype = (
+    ctypes.c_void_p
+)
+_UniffiLib.uniffi_nameless_rs_fn_method_credentialholder_switch_at_index.argtypes = (
+    ctypes.c_void_p,
+    ctypes.c_uint32,
+    ctypes.POINTER(_UniffiRustCallStatus),
+)
+_UniffiLib.uniffi_nameless_rs_fn_method_credentialholder_switch_at_index.restype = None
 _UniffiLib.uniffi_nameless_rs_fn_clone_credentialrequest.argtypes = (
     ctypes.c_void_p,
     ctypes.POINTER(_UniffiRustCallStatus),
@@ -2090,11 +2365,11 @@ _UniffiLib.uniffi_nameless_rs_fn_method_credentialrequest_export_json.argtypes =
 _UniffiLib.uniffi_nameless_rs_fn_method_credentialrequest_export_json.restype = (
     _UniffiRustBuffer
 )
-_UniffiLib.uniffi_nameless_rs_fn_method_credentialrequest_get_public_attributes.argtypes = (
+_UniffiLib.uniffi_nameless_rs_fn_method_credentialrequest_get_attribute_list.argtypes = (
     ctypes.c_void_p,
     ctypes.POINTER(_UniffiRustCallStatus),
 )
-_UniffiLib.uniffi_nameless_rs_fn_method_credentialrequest_get_public_attributes.restype = (
+_UniffiLib.uniffi_nameless_rs_fn_method_credentialrequest_get_attribute_list.restype = (
     ctypes.c_void_p
 )
 _UniffiLib.uniffi_nameless_rs_fn_method_credentialrequest_verify.argtypes = (
@@ -2283,125 +2558,6 @@ _UniffiLib.uniffi_nameless_rs_fn_method_groupparameters_export_json.argtypes = (
     ctypes.POINTER(_UniffiRustCallStatus),
 )
 _UniffiLib.uniffi_nameless_rs_fn_method_groupparameters_export_json.restype = (
-    _UniffiRustBuffer
-)
-_UniffiLib.uniffi_nameless_rs_fn_clone_holder.argtypes = (
-    ctypes.c_void_p,
-    ctypes.POINTER(_UniffiRustCallStatus),
-)
-_UniffiLib.uniffi_nameless_rs_fn_clone_holder.restype = ctypes.c_void_p
-_UniffiLib.uniffi_nameless_rs_fn_free_holder.argtypes = (
-    ctypes.c_void_p,
-    ctypes.POINTER(_UniffiRustCallStatus),
-)
-_UniffiLib.uniffi_nameless_rs_fn_free_holder.restype = None
-_UniffiLib.uniffi_nameless_rs_fn_constructor_holder_import_cbor.argtypes = (
-    _UniffiRustBuffer,
-    ctypes.POINTER(_UniffiRustCallStatus),
-)
-_UniffiLib.uniffi_nameless_rs_fn_constructor_holder_import_cbor.restype = (
-    ctypes.c_void_p
-)
-_UniffiLib.uniffi_nameless_rs_fn_constructor_holder_import_json.argtypes = (
-    _UniffiRustBuffer,
-    ctypes.POINTER(_UniffiRustCallStatus),
-)
-_UniffiLib.uniffi_nameless_rs_fn_constructor_holder_import_json.restype = (
-    ctypes.c_void_p
-)
-_UniffiLib.uniffi_nameless_rs_fn_constructor_holder_new.argtypes = (
-    ctypes.c_void_p,
-    ctypes.c_void_p,
-    ctypes.c_void_p,
-    ctypes.POINTER(_UniffiRustCallStatus),
-)
-_UniffiLib.uniffi_nameless_rs_fn_constructor_holder_new.restype = ctypes.c_void_p
-_UniffiLib.uniffi_nameless_rs_fn_method_holder_create_signature.argtypes = (
-    ctypes.c_void_p,
-    _UniffiRustBuffer,
-    ctypes.POINTER(_UniffiRustCallStatus),
-)
-_UniffiLib.uniffi_nameless_rs_fn_method_holder_create_signature.restype = (
-    ctypes.c_void_p
-)
-_UniffiLib.uniffi_nameless_rs_fn_method_holder_create_signature_with_accumulator.argtypes = (
-    ctypes.c_void_p,
-    _UniffiRustBuffer,
-    ctypes.POINTER(_UniffiRustCallStatus),
-)
-_UniffiLib.uniffi_nameless_rs_fn_method_holder_create_signature_with_accumulator.restype = (
-    ctypes.c_void_p
-)
-_UniffiLib.uniffi_nameless_rs_fn_method_holder_export_cbor.argtypes = (
-    ctypes.c_void_p,
-    ctypes.POINTER(_UniffiRustCallStatus),
-)
-_UniffiLib.uniffi_nameless_rs_fn_method_holder_export_cbor.restype = _UniffiRustBuffer
-_UniffiLib.uniffi_nameless_rs_fn_method_holder_export_json.argtypes = (
-    ctypes.c_void_p,
-    ctypes.POINTER(_UniffiRustCallStatus),
-)
-_UniffiLib.uniffi_nameless_rs_fn_method_holder_export_json.restype = _UniffiRustBuffer
-_UniffiLib.uniffi_nameless_rs_fn_method_holder_get_credential.argtypes = (
-    ctypes.c_void_p,
-    ctypes.POINTER(_UniffiRustCallStatus),
-)
-_UniffiLib.uniffi_nameless_rs_fn_method_holder_get_credential.restype = ctypes.c_void_p
-_UniffiLib.uniffi_nameless_rs_fn_method_holder_get_group_parameters.argtypes = (
-    ctypes.c_void_p,
-    ctypes.POINTER(_UniffiRustCallStatus),
-)
-_UniffiLib.uniffi_nameless_rs_fn_method_holder_get_group_parameters.restype = (
-    ctypes.c_void_p
-)
-_UniffiLib.uniffi_nameless_rs_fn_method_holder_get_last_valid_accumulator.argtypes = (
-    ctypes.c_void_p,
-    ctypes.POINTER(_UniffiRustCallStatus),
-)
-_UniffiLib.uniffi_nameless_rs_fn_method_holder_get_last_valid_accumulator.restype = (
-    ctypes.c_void_p
-)
-_UniffiLib.uniffi_nameless_rs_fn_method_holder_get_public_key.argtypes = (
-    ctypes.c_void_p,
-    ctypes.POINTER(_UniffiRustCallStatus),
-)
-_UniffiLib.uniffi_nameless_rs_fn_method_holder_get_public_key.restype = ctypes.c_void_p
-_UniffiLib.uniffi_nameless_rs_fn_clone_holderbuilder.argtypes = (
-    ctypes.c_void_p,
-    ctypes.POINTER(_UniffiRustCallStatus),
-)
-_UniffiLib.uniffi_nameless_rs_fn_clone_holderbuilder.restype = ctypes.c_void_p
-_UniffiLib.uniffi_nameless_rs_fn_free_holderbuilder.argtypes = (
-    ctypes.c_void_p,
-    ctypes.POINTER(_UniffiRustCallStatus),
-)
-_UniffiLib.uniffi_nameless_rs_fn_free_holderbuilder.restype = None
-_UniffiLib.uniffi_nameless_rs_fn_constructor_holderbuilder_import_cbor.argtypes = (
-    _UniffiRustBuffer,
-    ctypes.POINTER(_UniffiRustCallStatus),
-)
-_UniffiLib.uniffi_nameless_rs_fn_constructor_holderbuilder_import_cbor.restype = (
-    ctypes.c_void_p
-)
-_UniffiLib.uniffi_nameless_rs_fn_constructor_holderbuilder_import_json.argtypes = (
-    _UniffiRustBuffer,
-    ctypes.POINTER(_UniffiRustCallStatus),
-)
-_UniffiLib.uniffi_nameless_rs_fn_constructor_holderbuilder_import_json.restype = (
-    ctypes.c_void_p
-)
-_UniffiLib.uniffi_nameless_rs_fn_method_holderbuilder_export_cbor.argtypes = (
-    ctypes.c_void_p,
-    ctypes.POINTER(_UniffiRustCallStatus),
-)
-_UniffiLib.uniffi_nameless_rs_fn_method_holderbuilder_export_cbor.restype = (
-    _UniffiRustBuffer
-)
-_UniffiLib.uniffi_nameless_rs_fn_method_holderbuilder_export_json.argtypes = (
-    ctypes.c_void_p,
-    ctypes.POINTER(_UniffiRustCallStatus),
-)
-_UniffiLib.uniffi_nameless_rs_fn_method_holderbuilder_export_json.restype = (
     _UniffiRustBuffer
 )
 _UniffiLib.uniffi_nameless_rs_fn_clone_identifier.argtypes = (
@@ -2665,11 +2821,11 @@ _UniffiLib.uniffi_nameless_rs_fn_method_namelesssignature_export_json.argtypes =
 _UniffiLib.uniffi_nameless_rs_fn_method_namelesssignature_export_json.restype = (
     _UniffiRustBuffer
 )
-_UniffiLib.uniffi_nameless_rs_fn_method_namelesssignature_get_public_attributes.argtypes = (
+_UniffiLib.uniffi_nameless_rs_fn_method_namelesssignature_get_attribute_list.argtypes = (
     ctypes.c_void_p,
     ctypes.POINTER(_UniffiRustCallStatus),
 )
-_UniffiLib.uniffi_nameless_rs_fn_method_namelesssignature_get_public_attributes.restype = (
+_UniffiLib.uniffi_nameless_rs_fn_method_namelesssignature_get_attribute_list.restype = (
     ctypes.c_void_p
 )
 _UniffiLib.uniffi_nameless_rs_fn_method_namelesssignature_verify.argtypes = (
@@ -2734,6 +2890,13 @@ _UniffiLib.uniffi_nameless_rs_fn_method_namelesssignaturewithaccumulator_get_acc
     ctypes.POINTER(_UniffiRustCallStatus),
 )
 _UniffiLib.uniffi_nameless_rs_fn_method_namelesssignaturewithaccumulator_get_accumulator.restype = (
+    ctypes.c_void_p
+)
+_UniffiLib.uniffi_nameless_rs_fn_method_namelesssignaturewithaccumulator_get_attribute_list.argtypes = (
+    ctypes.c_void_p,
+    ctypes.POINTER(_UniffiRustCallStatus),
+)
+_UniffiLib.uniffi_nameless_rs_fn_method_namelesssignaturewithaccumulator_get_attribute_list.restype = (
     ctypes.c_void_p
 )
 _UniffiLib.uniffi_nameless_rs_fn_method_namelesssignaturewithaccumulator_get_signature.argtypes = (
@@ -2811,6 +2974,51 @@ _UniffiLib.uniffi_nameless_rs_fn_method_openingkey_open.argtypes = (
     ctypes.POINTER(_UniffiRustCallStatus),
 )
 _UniffiLib.uniffi_nameless_rs_fn_method_openingkey_open.restype = ctypes.c_void_p
+_UniffiLib.uniffi_nameless_rs_fn_clone_partialcredential.argtypes = (
+    ctypes.c_void_p,
+    ctypes.POINTER(_UniffiRustCallStatus),
+)
+_UniffiLib.uniffi_nameless_rs_fn_clone_partialcredential.restype = ctypes.c_void_p
+_UniffiLib.uniffi_nameless_rs_fn_free_partialcredential.argtypes = (
+    ctypes.c_void_p,
+    ctypes.POINTER(_UniffiRustCallStatus),
+)
+_UniffiLib.uniffi_nameless_rs_fn_free_partialcredential.restype = None
+_UniffiLib.uniffi_nameless_rs_fn_constructor_partialcredential_import_cbor.argtypes = (
+    _UniffiRustBuffer,
+    ctypes.POINTER(_UniffiRustCallStatus),
+)
+_UniffiLib.uniffi_nameless_rs_fn_constructor_partialcredential_import_cbor.restype = (
+    ctypes.c_void_p
+)
+_UniffiLib.uniffi_nameless_rs_fn_constructor_partialcredential_import_json.argtypes = (
+    _UniffiRustBuffer,
+    ctypes.POINTER(_UniffiRustCallStatus),
+)
+_UniffiLib.uniffi_nameless_rs_fn_constructor_partialcredential_import_json.restype = (
+    ctypes.c_void_p
+)
+_UniffiLib.uniffi_nameless_rs_fn_method_partialcredential_export_cbor.argtypes = (
+    ctypes.c_void_p,
+    ctypes.POINTER(_UniffiRustCallStatus),
+)
+_UniffiLib.uniffi_nameless_rs_fn_method_partialcredential_export_cbor.restype = (
+    _UniffiRustBuffer
+)
+_UniffiLib.uniffi_nameless_rs_fn_method_partialcredential_export_json.argtypes = (
+    ctypes.c_void_p,
+    ctypes.POINTER(_UniffiRustCallStatus),
+)
+_UniffiLib.uniffi_nameless_rs_fn_method_partialcredential_export_json.restype = (
+    _UniffiRustBuffer
+)
+_UniffiLib.uniffi_nameless_rs_fn_method_partialcredential_validate.argtypes = (
+    ctypes.c_void_p,
+    ctypes.POINTER(_UniffiRustCallStatus),
+)
+_UniffiLib.uniffi_nameless_rs_fn_method_partialcredential_validate.restype = (
+    ctypes.c_int8
+)
 _UniffiLib.uniffi_nameless_rs_fn_clone_publicgroupinformation.argtypes = (
     ctypes.c_void_p,
     ctypes.POINTER(_UniffiRustCallStatus),
@@ -3349,8 +3557,8 @@ _UniffiLib.uniffi_nameless_rs_checksum_method_accumulatorstore_get_previous_accu
 _UniffiLib.uniffi_nameless_rs_checksum_method_accumulatorstore_get_previous_accumulator.restype = (
     ctypes.c_uint16
 )
-_UniffiLib.uniffi_nameless_rs_checksum_method_accumulatorstore_request_updated_identifier.argtypes = ()
-_UniffiLib.uniffi_nameless_rs_checksum_method_accumulatorstore_request_updated_identifier.restype = (
+_UniffiLib.uniffi_nameless_rs_checksum_method_accumulatorstore_get_updated_identifier.argtypes = ()
+_UniffiLib.uniffi_nameless_rs_checksum_method_accumulatorstore_get_updated_identifier.restype = (
     ctypes.c_uint16
 )
 _UniffiLib.uniffi_nameless_rs_checksum_method_accumulatorstore_revoke_from_identifier.argtypes = ()
@@ -3365,8 +3573,8 @@ _UniffiLib.uniffi_nameless_rs_checksum_method_accumulatorvalue_export_json.argty
 _UniffiLib.uniffi_nameless_rs_checksum_method_accumulatorvalue_export_json.restype = (
     ctypes.c_uint16
 )
-_UniffiLib.uniffi_nameless_rs_checksum_method_credential_get_credential_attribute_list.argtypes = ()
-_UniffiLib.uniffi_nameless_rs_checksum_method_credential_get_credential_attribute_list.restype = (
+_UniffiLib.uniffi_nameless_rs_checksum_method_credential_get_attribute_list.argtypes = ()
+_UniffiLib.uniffi_nameless_rs_checksum_method_credential_get_attribute_list.restype = (
     ctypes.c_uint16
 )
 _UniffiLib.uniffi_nameless_rs_checksum_method_credentialattribute_export_cbor.argtypes = ()
@@ -3397,6 +3605,66 @@ _UniffiLib.uniffi_nameless_rs_checksum_method_credentialattributelist_export_jso
 _UniffiLib.uniffi_nameless_rs_checksum_method_credentialattributelist_export_json.restype = (
     ctypes.c_uint16
 )
+_UniffiLib.uniffi_nameless_rs_checksum_method_credentialbuilder_export_cbor.argtypes = ()
+_UniffiLib.uniffi_nameless_rs_checksum_method_credentialbuilder_export_cbor.restype = (
+    ctypes.c_uint16
+)
+_UniffiLib.uniffi_nameless_rs_checksum_method_credentialbuilder_export_json.argtypes = ()
+_UniffiLib.uniffi_nameless_rs_checksum_method_credentialbuilder_export_json.restype = (
+    ctypes.c_uint16
+)
+_UniffiLib.uniffi_nameless_rs_checksum_method_credentialbuilder_finalize.argtypes = ()
+_UniffiLib.uniffi_nameless_rs_checksum_method_credentialbuilder_finalize.restype = (
+    ctypes.c_uint16
+)
+_UniffiLib.uniffi_nameless_rs_checksum_method_credentialbuilder_generate_credential_request.argtypes = ()
+_UniffiLib.uniffi_nameless_rs_checksum_method_credentialbuilder_generate_credential_request.restype = (
+    ctypes.c_uint16
+)
+_UniffiLib.uniffi_nameless_rs_checksum_method_credentialholder_create_signature.argtypes = ()
+_UniffiLib.uniffi_nameless_rs_checksum_method_credentialholder_create_signature.restype = (
+    ctypes.c_uint16
+)
+_UniffiLib.uniffi_nameless_rs_checksum_method_credentialholder_create_signature_with_accumulator.argtypes = ()
+_UniffiLib.uniffi_nameless_rs_checksum_method_credentialholder_create_signature_with_accumulator.restype = (
+    ctypes.c_uint16
+)
+_UniffiLib.uniffi_nameless_rs_checksum_method_credentialholder_create_updated_credential.argtypes = ()
+_UniffiLib.uniffi_nameless_rs_checksum_method_credentialholder_create_updated_credential.restype = (
+    ctypes.c_uint16
+)
+_UniffiLib.uniffi_nameless_rs_checksum_method_credentialholder_export_cbor.argtypes = ()
+_UniffiLib.uniffi_nameless_rs_checksum_method_credentialholder_export_cbor.restype = (
+    ctypes.c_uint16
+)
+_UniffiLib.uniffi_nameless_rs_checksum_method_credentialholder_export_json.argtypes = ()
+_UniffiLib.uniffi_nameless_rs_checksum_method_credentialholder_export_json.restype = (
+    ctypes.c_uint16
+)
+_UniffiLib.uniffi_nameless_rs_checksum_method_credentialholder_get_credential.argtypes = ()
+_UniffiLib.uniffi_nameless_rs_checksum_method_credentialholder_get_credential.restype = (
+    ctypes.c_uint16
+)
+_UniffiLib.uniffi_nameless_rs_checksum_method_credentialholder_get_group_parameters.argtypes = ()
+_UniffiLib.uniffi_nameless_rs_checksum_method_credentialholder_get_group_parameters.restype = (
+    ctypes.c_uint16
+)
+_UniffiLib.uniffi_nameless_rs_checksum_method_credentialholder_get_identifier.argtypes = ()
+_UniffiLib.uniffi_nameless_rs_checksum_method_credentialholder_get_identifier.restype = (
+    ctypes.c_uint16
+)
+_UniffiLib.uniffi_nameless_rs_checksum_method_credentialholder_get_last_valid_accumulator.argtypes = ()
+_UniffiLib.uniffi_nameless_rs_checksum_method_credentialholder_get_last_valid_accumulator.restype = (
+    ctypes.c_uint16
+)
+_UniffiLib.uniffi_nameless_rs_checksum_method_credentialholder_get_public_key.argtypes = ()
+_UniffiLib.uniffi_nameless_rs_checksum_method_credentialholder_get_public_key.restype = (
+    ctypes.c_uint16
+)
+_UniffiLib.uniffi_nameless_rs_checksum_method_credentialholder_switch_at_index.argtypes = ()
+_UniffiLib.uniffi_nameless_rs_checksum_method_credentialholder_switch_at_index.restype = (
+    ctypes.c_uint16
+)
 _UniffiLib.uniffi_nameless_rs_checksum_method_credentialrequest_export_cbor.argtypes = ()
 _UniffiLib.uniffi_nameless_rs_checksum_method_credentialrequest_export_cbor.restype = (
     ctypes.c_uint16
@@ -3405,8 +3673,8 @@ _UniffiLib.uniffi_nameless_rs_checksum_method_credentialrequest_export_json.argt
 _UniffiLib.uniffi_nameless_rs_checksum_method_credentialrequest_export_json.restype = (
     ctypes.c_uint16
 )
-_UniffiLib.uniffi_nameless_rs_checksum_method_credentialrequest_get_public_attributes.argtypes = ()
-_UniffiLib.uniffi_nameless_rs_checksum_method_credentialrequest_get_public_attributes.restype = (
+_UniffiLib.uniffi_nameless_rs_checksum_method_credentialrequest_get_attribute_list.argtypes = ()
+_UniffiLib.uniffi_nameless_rs_checksum_method_credentialrequest_get_attribute_list.restype = (
     ctypes.c_uint16
 )
 _UniffiLib.uniffi_nameless_rs_checksum_method_credentialrequest_verify.argtypes = ()
@@ -3443,46 +3711,6 @@ _UniffiLib.uniffi_nameless_rs_checksum_method_groupparameters_export_cbor.restyp
 )
 _UniffiLib.uniffi_nameless_rs_checksum_method_groupparameters_export_json.argtypes = ()
 _UniffiLib.uniffi_nameless_rs_checksum_method_groupparameters_export_json.restype = (
-    ctypes.c_uint16
-)
-_UniffiLib.uniffi_nameless_rs_checksum_method_holder_create_signature.argtypes = ()
-_UniffiLib.uniffi_nameless_rs_checksum_method_holder_create_signature.restype = (
-    ctypes.c_uint16
-)
-_UniffiLib.uniffi_nameless_rs_checksum_method_holder_create_signature_with_accumulator.argtypes = ()
-_UniffiLib.uniffi_nameless_rs_checksum_method_holder_create_signature_with_accumulator.restype = (
-    ctypes.c_uint16
-)
-_UniffiLib.uniffi_nameless_rs_checksum_method_holder_export_cbor.argtypes = ()
-_UniffiLib.uniffi_nameless_rs_checksum_method_holder_export_cbor.restype = (
-    ctypes.c_uint16
-)
-_UniffiLib.uniffi_nameless_rs_checksum_method_holder_export_json.argtypes = ()
-_UniffiLib.uniffi_nameless_rs_checksum_method_holder_export_json.restype = (
-    ctypes.c_uint16
-)
-_UniffiLib.uniffi_nameless_rs_checksum_method_holder_get_credential.argtypes = ()
-_UniffiLib.uniffi_nameless_rs_checksum_method_holder_get_credential.restype = (
-    ctypes.c_uint16
-)
-_UniffiLib.uniffi_nameless_rs_checksum_method_holder_get_group_parameters.argtypes = ()
-_UniffiLib.uniffi_nameless_rs_checksum_method_holder_get_group_parameters.restype = (
-    ctypes.c_uint16
-)
-_UniffiLib.uniffi_nameless_rs_checksum_method_holder_get_last_valid_accumulator.argtypes = ()
-_UniffiLib.uniffi_nameless_rs_checksum_method_holder_get_last_valid_accumulator.restype = (
-    ctypes.c_uint16
-)
-_UniffiLib.uniffi_nameless_rs_checksum_method_holder_get_public_key.argtypes = ()
-_UniffiLib.uniffi_nameless_rs_checksum_method_holder_get_public_key.restype = (
-    ctypes.c_uint16
-)
-_UniffiLib.uniffi_nameless_rs_checksum_method_holderbuilder_export_cbor.argtypes = ()
-_UniffiLib.uniffi_nameless_rs_checksum_method_holderbuilder_export_cbor.restype = (
-    ctypes.c_uint16
-)
-_UniffiLib.uniffi_nameless_rs_checksum_method_holderbuilder_export_json.argtypes = ()
-_UniffiLib.uniffi_nameless_rs_checksum_method_holderbuilder_export_json.restype = (
     ctypes.c_uint16
 )
 _UniffiLib.uniffi_nameless_rs_checksum_method_identifier_export_cbor.argtypes = ()
@@ -3559,8 +3787,8 @@ _UniffiLib.uniffi_nameless_rs_checksum_method_namelesssignature_export_json.argt
 _UniffiLib.uniffi_nameless_rs_checksum_method_namelesssignature_export_json.restype = (
     ctypes.c_uint16
 )
-_UniffiLib.uniffi_nameless_rs_checksum_method_namelesssignature_get_public_attributes.argtypes = ()
-_UniffiLib.uniffi_nameless_rs_checksum_method_namelesssignature_get_public_attributes.restype = (
+_UniffiLib.uniffi_nameless_rs_checksum_method_namelesssignature_get_attribute_list.argtypes = ()
+_UniffiLib.uniffi_nameless_rs_checksum_method_namelesssignature_get_attribute_list.restype = (
     ctypes.c_uint16
 )
 _UniffiLib.uniffi_nameless_rs_checksum_method_namelesssignature_verify.argtypes = ()
@@ -3577,6 +3805,10 @@ _UniffiLib.uniffi_nameless_rs_checksum_method_namelesssignaturewithaccumulator_e
 )
 _UniffiLib.uniffi_nameless_rs_checksum_method_namelesssignaturewithaccumulator_get_accumulator.argtypes = ()
 _UniffiLib.uniffi_nameless_rs_checksum_method_namelesssignaturewithaccumulator_get_accumulator.restype = (
+    ctypes.c_uint16
+)
+_UniffiLib.uniffi_nameless_rs_checksum_method_namelesssignaturewithaccumulator_get_attribute_list.argtypes = ()
+_UniffiLib.uniffi_nameless_rs_checksum_method_namelesssignaturewithaccumulator_get_attribute_list.restype = (
     ctypes.c_uint16
 )
 _UniffiLib.uniffi_nameless_rs_checksum_method_namelesssignaturewithaccumulator_get_signature.argtypes = ()
@@ -3597,6 +3829,18 @@ _UniffiLib.uniffi_nameless_rs_checksum_method_openingkey_export_json.restype = (
 )
 _UniffiLib.uniffi_nameless_rs_checksum_method_openingkey_open.argtypes = ()
 _UniffiLib.uniffi_nameless_rs_checksum_method_openingkey_open.restype = ctypes.c_uint16
+_UniffiLib.uniffi_nameless_rs_checksum_method_partialcredential_export_cbor.argtypes = ()
+_UniffiLib.uniffi_nameless_rs_checksum_method_partialcredential_export_cbor.restype = (
+    ctypes.c_uint16
+)
+_UniffiLib.uniffi_nameless_rs_checksum_method_partialcredential_export_json.argtypes = ()
+_UniffiLib.uniffi_nameless_rs_checksum_method_partialcredential_export_json.restype = (
+    ctypes.c_uint16
+)
+_UniffiLib.uniffi_nameless_rs_checksum_method_partialcredential_validate.argtypes = ()
+_UniffiLib.uniffi_nameless_rs_checksum_method_partialcredential_validate.restype = (
+    ctypes.c_uint16
+)
 _UniffiLib.uniffi_nameless_rs_checksum_method_publicgroupinformation_export_cbor.argtypes = ()
 _UniffiLib.uniffi_nameless_rs_checksum_method_publicgroupinformation_export_cbor.restype = (
     ctypes.c_uint16
@@ -3759,6 +4003,34 @@ _UniffiLib.uniffi_nameless_rs_checksum_constructor_credentialattributelist_new.a
 _UniffiLib.uniffi_nameless_rs_checksum_constructor_credentialattributelist_new.restype = (
     ctypes.c_uint16
 )
+_UniffiLib.uniffi_nameless_rs_checksum_constructor_credentialbuilder_import_cbor.argtypes = ()
+_UniffiLib.uniffi_nameless_rs_checksum_constructor_credentialbuilder_import_cbor.restype = (
+    ctypes.c_uint16
+)
+_UniffiLib.uniffi_nameless_rs_checksum_constructor_credentialbuilder_import_json.argtypes = ()
+_UniffiLib.uniffi_nameless_rs_checksum_constructor_credentialbuilder_import_json.restype = (
+    ctypes.c_uint16
+)
+_UniffiLib.uniffi_nameless_rs_checksum_constructor_credentialbuilder_new.argtypes = ()
+_UniffiLib.uniffi_nameless_rs_checksum_constructor_credentialbuilder_new.restype = (
+    ctypes.c_uint16
+)
+_UniffiLib.uniffi_nameless_rs_checksum_constructor_credentialbuilder_new_with_secret.argtypes = ()
+_UniffiLib.uniffi_nameless_rs_checksum_constructor_credentialbuilder_new_with_secret.restype = (
+    ctypes.c_uint16
+)
+_UniffiLib.uniffi_nameless_rs_checksum_constructor_credentialholder_import_cbor.argtypes = ()
+_UniffiLib.uniffi_nameless_rs_checksum_constructor_credentialholder_import_cbor.restype = (
+    ctypes.c_uint16
+)
+_UniffiLib.uniffi_nameless_rs_checksum_constructor_credentialholder_import_json.argtypes = ()
+_UniffiLib.uniffi_nameless_rs_checksum_constructor_credentialholder_import_json.restype = (
+    ctypes.c_uint16
+)
+_UniffiLib.uniffi_nameless_rs_checksum_constructor_credentialholder_new.argtypes = ()
+_UniffiLib.uniffi_nameless_rs_checksum_constructor_credentialholder_new.restype = (
+    ctypes.c_uint16
+)
 _UniffiLib.uniffi_nameless_rs_checksum_constructor_credentialrequest_import_cbor.argtypes = ()
 _UniffiLib.uniffi_nameless_rs_checksum_constructor_credentialrequest_import_cbor.restype = (
     ctypes.c_uint16
@@ -3813,24 +4085,6 @@ _UniffiLib.uniffi_nameless_rs_checksum_constructor_groupparameters_import_json.r
 )
 _UniffiLib.uniffi_nameless_rs_checksum_constructor_groupparameters_new.argtypes = ()
 _UniffiLib.uniffi_nameless_rs_checksum_constructor_groupparameters_new.restype = (
-    ctypes.c_uint16
-)
-_UniffiLib.uniffi_nameless_rs_checksum_constructor_holder_import_cbor.argtypes = ()
-_UniffiLib.uniffi_nameless_rs_checksum_constructor_holder_import_cbor.restype = (
-    ctypes.c_uint16
-)
-_UniffiLib.uniffi_nameless_rs_checksum_constructor_holder_import_json.argtypes = ()
-_UniffiLib.uniffi_nameless_rs_checksum_constructor_holder_import_json.restype = (
-    ctypes.c_uint16
-)
-_UniffiLib.uniffi_nameless_rs_checksum_constructor_holder_new.argtypes = ()
-_UniffiLib.uniffi_nameless_rs_checksum_constructor_holder_new.restype = ctypes.c_uint16
-_UniffiLib.uniffi_nameless_rs_checksum_constructor_holderbuilder_import_cbor.argtypes = ()
-_UniffiLib.uniffi_nameless_rs_checksum_constructor_holderbuilder_import_cbor.restype = (
-    ctypes.c_uint16
-)
-_UniffiLib.uniffi_nameless_rs_checksum_constructor_holderbuilder_import_json.argtypes = ()
-_UniffiLib.uniffi_nameless_rs_checksum_constructor_holderbuilder_import_json.restype = (
     ctypes.c_uint16
 )
 _UniffiLib.uniffi_nameless_rs_checksum_constructor_identifier_import_cbor.argtypes = ()
@@ -3899,6 +4153,14 @@ _UniffiLib.uniffi_nameless_rs_checksum_constructor_openingkey_import_json.restyp
 )
 _UniffiLib.uniffi_nameless_rs_checksum_constructor_openingkey_new.argtypes = ()
 _UniffiLib.uniffi_nameless_rs_checksum_constructor_openingkey_new.restype = (
+    ctypes.c_uint16
+)
+_UniffiLib.uniffi_nameless_rs_checksum_constructor_partialcredential_import_cbor.argtypes = ()
+_UniffiLib.uniffi_nameless_rs_checksum_constructor_partialcredential_import_cbor.restype = (
+    ctypes.c_uint16
+)
+_UniffiLib.uniffi_nameless_rs_checksum_constructor_partialcredential_import_json.argtypes = ()
+_UniffiLib.uniffi_nameless_rs_checksum_constructor_partialcredential_import_json.restype = (
     ctypes.c_uint16
 )
 _UniffiLib.uniffi_nameless_rs_checksum_constructor_publicgroupinformation_from_hash.argtypes = ()
@@ -4082,6 +4344,7 @@ class _UniffiConverterBytes(_UniffiConverterRustBuffer):
 
 class AccumulatorPublicKeyProtocol(typing.Protocol):
     """
+    STUB
     A trait for verifying accumulator signatures, so that any signature scheme can be used.
     Pairing cryptography is not necessary here, so we ask only for a foreign implementation that we can use.
     """
@@ -4092,6 +4355,7 @@ class AccumulatorPublicKeyProtocol(typing.Protocol):
 
 class AccumulatorPublicKey:
     """
+    STUB
     A trait for verifying accumulator signatures, so that any signature scheme can be used.
     Pairing cryptography is not necessary here, so we ask only for a foreign implementation that we can use.
     """
@@ -4308,6 +4572,7 @@ class _UniffiConverterTypeAccumulatorSignature:
 
 class AccumulatorSigningKeyProtocol(typing.Protocol):
     """
+    STUB
     A trait for signing accumulator values, so that any signature scheme can be used.
     Pairing cryptography is not necessary here, so we ask only for a foreign implementation that we can use.
     """
@@ -4318,6 +4583,7 @@ class AccumulatorSigningKeyProtocol(typing.Protocol):
 
 class AccumulatorSigningKey:
     """
+    STUB
     A trait for signing accumulator values, so that any signature scheme can be used.
     Pairing cryptography is not necessary here, so we ask only for a foreign implementation that we can use.
     """
@@ -4405,7 +4671,7 @@ class AccumulatorStoreProtocol(typing.Protocol):
     # Usage
     ```
     use nameless_rs::core::{AccumulatorStore, IssuingKey};
-    use nameless_rs::owners::HolderBuilder;
+    use nameless_rs::owners::PartialCredential;
 
     let accumulator_store = AccumulatorStore::new();
 
@@ -4428,7 +4694,7 @@ class AccumulatorStoreProtocol(typing.Protocol):
     def get_previous_accumulator(self, epoch: "int"):
         raise NotImplementedError
 
-    def request_updated_identifier(self, identifier: "Identifier"):
+    def get_updated_identifier(self, identifier: "Identifier"):
         raise NotImplementedError
 
     def revoke_from_identifier(self, identifier: "Identifier"):
@@ -4442,7 +4708,7 @@ class AccumulatorStore:
     # Usage
     ```
     use nameless_rs::core::{AccumulatorStore, IssuingKey};
-    use nameless_rs::owners::HolderBuilder;
+    use nameless_rs::owners::PartialCredential;
 
     let accumulator_store = AccumulatorStore::new();
 
@@ -4528,12 +4794,13 @@ class AccumulatorStore:
             )
         )
 
-    def request_updated_identifier(self, identifier: "Identifier") -> "Identifier":
+    def get_updated_identifier(self, identifier: "Identifier") -> "Identifier":
         _UniffiConverterTypeIdentifier.check_lower(identifier)
 
         return _UniffiConverterTypeIdentifier.lift(
-            _uniffi_rust_call(
-                _UniffiLib.uniffi_nameless_rs_fn_method_accumulatorstore_request_updated_identifier,
+            _uniffi_rust_call_with_error(
+                _UniffiConverterTypeApiError,
+                _UniffiLib.uniffi_nameless_rs_fn_method_accumulatorstore_get_updated_identifier,
                 self._uniffi_clone_pointer(),
                 _UniffiConverterTypeIdentifier.lower(identifier),
             )
@@ -4764,7 +5031,7 @@ class CredentialProtocol(typing.Protocol):
     Uses a total of 2G1 + (2+k)S.
     """
 
-    def get_credential_attribute_list(
+    def get_attribute_list(
         self,
     ):
         raise NotImplementedError
@@ -4801,12 +5068,12 @@ class Credential:
         inst._pointer = pointer
         return inst
 
-    def get_credential_attribute_list(
+    def get_attribute_list(
         self,
     ) -> "CredentialAttributeList":
         return _UniffiConverterTypeCredentialAttributeList.lift(
             _uniffi_rust_call(
-                _UniffiLib.uniffi_nameless_rs_fn_method_credential_get_credential_attribute_list,
+                _UniffiLib.uniffi_nameless_rs_fn_method_credential_get_attribute_list,
                 self._uniffi_clone_pointer(),
             )
         )
@@ -5332,6 +5599,459 @@ class _UniffiConverterTypeCredentialAttributeList:
         buf.write_u64(cls.lower(value))
 
 
+class CredentialBuilderProtocol(typing.Protocol):
+    def export_cbor(
+        self,
+    ):
+        raise NotImplementedError
+
+    def export_json(
+        self,
+    ):
+        raise NotImplementedError
+
+    def finalize(self, partial_credential: "PartialCredential"):
+        raise NotImplementedError
+
+    def generate_credential_request(self, group_parameters: "GroupParameters"):
+        raise NotImplementedError
+
+
+class CredentialBuilder:
+    _pointer: ctypes.c_void_p
+
+    def __init__(self, credential_attributes: "CredentialAttributeList"):
+        """
+        Makes a holder builder with
+        """
+
+        _UniffiConverterTypeCredentialAttributeList.check_lower(credential_attributes)
+
+        self._pointer = _uniffi_rust_call(
+            _UniffiLib.uniffi_nameless_rs_fn_constructor_credentialbuilder_new,
+            _UniffiConverterTypeCredentialAttributeList.lower(credential_attributes),
+        )
+
+    def __del__(self):
+        # In case of partial initialization of instances.
+        pointer = getattr(self, "_pointer", None)
+        if pointer is not None:
+            _uniffi_rust_call(
+                _UniffiLib.uniffi_nameless_rs_fn_free_credentialbuilder, pointer
+            )
+
+    def _uniffi_clone_pointer(self):
+        return _uniffi_rust_call(
+            _UniffiLib.uniffi_nameless_rs_fn_clone_credentialbuilder, self._pointer
+        )
+
+    # Used by alternative constructors or any methods which return this type.
+    @classmethod
+    def _make_instance_(cls, pointer):
+        # Lightly yucky way to bypass the usual __init__ logic
+        # and just create a new instance with the required pointer.
+        inst = cls.__new__(cls)
+        inst._pointer = pointer
+        return inst
+
+    @classmethod
+    def import_cbor(cls, data: "bytes"):
+        _UniffiConverterBytes.check_lower(data)
+
+        # Call the (fallible) function before creating any half-baked object instances.
+        pointer = _uniffi_rust_call_with_error(
+            _UniffiConverterTypeApiError,
+            _UniffiLib.uniffi_nameless_rs_fn_constructor_credentialbuilder_import_cbor,
+            _UniffiConverterBytes.lower(data),
+        )
+        return cls._make_instance_(pointer)
+
+    @classmethod
+    def import_json(cls, data: "str"):
+        _UniffiConverterString.check_lower(data)
+
+        # Call the (fallible) function before creating any half-baked object instances.
+        pointer = _uniffi_rust_call_with_error(
+            _UniffiConverterTypeApiError,
+            _UniffiLib.uniffi_nameless_rs_fn_constructor_credentialbuilder_import_json,
+            _UniffiConverterString.lower(data),
+        )
+        return cls._make_instance_(pointer)
+
+    @classmethod
+    def new_with_secret(
+        cls,
+        credential_attributes: "CredentialAttributeList",
+        credential_secret: "CredentialSecret",
+    ):
+        _UniffiConverterTypeCredentialAttributeList.check_lower(credential_attributes)
+
+        _UniffiConverterTypeCredentialSecret.check_lower(credential_secret)
+
+        # Call the (fallible) function before creating any half-baked object instances.
+        pointer = _uniffi_rust_call(
+            _UniffiLib.uniffi_nameless_rs_fn_constructor_credentialbuilder_new_with_secret,
+            _UniffiConverterTypeCredentialAttributeList.lower(credential_attributes),
+            _UniffiConverterTypeCredentialSecret.lower(credential_secret),
+        )
+        return cls._make_instance_(pointer)
+
+    def export_cbor(
+        self,
+    ) -> "bytes":
+        return _UniffiConverterBytes.lift(
+            _uniffi_rust_call_with_error(
+                _UniffiConverterTypeApiError,
+                _UniffiLib.uniffi_nameless_rs_fn_method_credentialbuilder_export_cbor,
+                self._uniffi_clone_pointer(),
+            )
+        )
+
+    def export_json(
+        self,
+    ) -> "str":
+        return _UniffiConverterString.lift(
+            _uniffi_rust_call_with_error(
+                _UniffiConverterTypeApiError,
+                _UniffiLib.uniffi_nameless_rs_fn_method_credentialbuilder_export_json,
+                self._uniffi_clone_pointer(),
+            )
+        )
+
+    def finalize(self, partial_credential: "PartialCredential") -> "CredentialHolder":
+        _UniffiConverterTypePartialCredential.check_lower(partial_credential)
+
+        return _UniffiConverterTypeCredentialHolder.lift(
+            _uniffi_rust_call_with_error(
+                _UniffiConverterTypeApiError,
+                _UniffiLib.uniffi_nameless_rs_fn_method_credentialbuilder_finalize,
+                self._uniffi_clone_pointer(),
+                _UniffiConverterTypePartialCredential.lower(partial_credential),
+            )
+        )
+
+    def generate_credential_request(
+        self, group_parameters: "GroupParameters"
+    ) -> "CredentialRequest":
+        _UniffiConverterTypeGroupParameters.check_lower(group_parameters)
+
+        return _UniffiConverterTypeCredentialRequest.lift(
+            _uniffi_rust_call(
+                _UniffiLib.uniffi_nameless_rs_fn_method_credentialbuilder_generate_credential_request,
+                self._uniffi_clone_pointer(),
+                _UniffiConverterTypeGroupParameters.lower(group_parameters),
+            )
+        )
+
+
+class _UniffiConverterTypeCredentialBuilder:
+
+    @staticmethod
+    def lift(value: int):
+        return CredentialBuilder._make_instance_(value)
+
+    @staticmethod
+    def check_lower(value: CredentialBuilder):
+        if not isinstance(value, CredentialBuilder):
+            raise TypeError(
+                "Expected CredentialBuilder instance, {} found".format(
+                    type(value).__name__
+                )
+            )
+
+    @staticmethod
+    def lower(value: CredentialBuilderProtocol):
+        if not isinstance(value, CredentialBuilder):
+            raise TypeError(
+                "Expected CredentialBuilder instance, {} found".format(
+                    type(value).__name__
+                )
+            )
+        return value._uniffi_clone_pointer()
+
+    @classmethod
+    def read(cls, buf: _UniffiRustBuffer):
+        ptr = buf.read_u64()
+        if ptr == 0:
+            raise InternalError("Raw pointer value was null")
+        return cls.lift(ptr)
+
+    @classmethod
+    def write(cls, value: CredentialBuilderProtocol, buf: _UniffiRustBuffer):
+        buf.write_u64(cls.lower(value))
+
+
+class CredentialHolderProtocol(typing.Protocol):
+    def create_signature(self, bytes_to_hash: "bytes"):
+        raise NotImplementedError
+
+    def create_signature_with_accumulator(self, bytes_to_hash: "bytes"):
+        raise NotImplementedError
+
+    def create_updated_credential(self, identifier: "Identifier"):
+        raise NotImplementedError
+
+    def export_cbor(
+        self,
+    ):
+        raise NotImplementedError
+
+    def export_json(
+        self,
+    ):
+        raise NotImplementedError
+
+    def get_credential(
+        self,
+    ):
+        raise NotImplementedError
+
+    def get_group_parameters(
+        self,
+    ):
+        raise NotImplementedError
+
+    def get_identifier(
+        self,
+    ):
+        raise NotImplementedError
+
+    def get_last_valid_accumulator(
+        self,
+    ):
+        raise NotImplementedError
+
+    def get_public_key(
+        self,
+    ):
+        raise NotImplementedError
+
+    def switch_at_index(self, index: "int"):
+        raise NotImplementedError
+
+
+class CredentialHolder:
+    _pointer: ctypes.c_void_p
+
+    def __init__(
+        self,
+        partial_credential: "PartialCredential",
+        credential_attributes: "CredentialAttributeList",
+        credential_secret: "CredentialSecret",
+    ):
+        _UniffiConverterTypePartialCredential.check_lower(partial_credential)
+
+        _UniffiConverterTypeCredentialAttributeList.check_lower(credential_attributes)
+
+        _UniffiConverterTypeCredentialSecret.check_lower(credential_secret)
+
+        self._pointer = _uniffi_rust_call(
+            _UniffiLib.uniffi_nameless_rs_fn_constructor_credentialholder_new,
+            _UniffiConverterTypePartialCredential.lower(partial_credential),
+            _UniffiConverterTypeCredentialAttributeList.lower(credential_attributes),
+            _UniffiConverterTypeCredentialSecret.lower(credential_secret),
+        )
+
+    def __del__(self):
+        # In case of partial initialization of instances.
+        pointer = getattr(self, "_pointer", None)
+        if pointer is not None:
+            _uniffi_rust_call(
+                _UniffiLib.uniffi_nameless_rs_fn_free_credentialholder, pointer
+            )
+
+    def _uniffi_clone_pointer(self):
+        return _uniffi_rust_call(
+            _UniffiLib.uniffi_nameless_rs_fn_clone_credentialholder, self._pointer
+        )
+
+    # Used by alternative constructors or any methods which return this type.
+    @classmethod
+    def _make_instance_(cls, pointer):
+        # Lightly yucky way to bypass the usual __init__ logic
+        # and just create a new instance with the required pointer.
+        inst = cls.__new__(cls)
+        inst._pointer = pointer
+        return inst
+
+    @classmethod
+    def import_cbor(cls, data: "bytes"):
+        _UniffiConverterBytes.check_lower(data)
+
+        # Call the (fallible) function before creating any half-baked object instances.
+        pointer = _uniffi_rust_call_with_error(
+            _UniffiConverterTypeApiError,
+            _UniffiLib.uniffi_nameless_rs_fn_constructor_credentialholder_import_cbor,
+            _UniffiConverterBytes.lower(data),
+        )
+        return cls._make_instance_(pointer)
+
+    @classmethod
+    def import_json(cls, data: "str"):
+        _UniffiConverterString.check_lower(data)
+
+        # Call the (fallible) function before creating any half-baked object instances.
+        pointer = _uniffi_rust_call_with_error(
+            _UniffiConverterTypeApiError,
+            _UniffiLib.uniffi_nameless_rs_fn_constructor_credentialholder_import_json,
+            _UniffiConverterString.lower(data),
+        )
+        return cls._make_instance_(pointer)
+
+    def create_signature(self, bytes_to_hash: "bytes") -> "NamelessSignature":
+        _UniffiConverterBytes.check_lower(bytes_to_hash)
+
+        return _UniffiConverterTypeNamelessSignature.lift(
+            _uniffi_rust_call(
+                _UniffiLib.uniffi_nameless_rs_fn_method_credentialholder_create_signature,
+                self._uniffi_clone_pointer(),
+                _UniffiConverterBytes.lower(bytes_to_hash),
+            )
+        )
+
+    def create_signature_with_accumulator(
+        self, bytes_to_hash: "bytes"
+    ) -> "NamelessSignatureWithAccumulator":
+        _UniffiConverterBytes.check_lower(bytes_to_hash)
+
+        return _UniffiConverterTypeNamelessSignatureWithAccumulator.lift(
+            _uniffi_rust_call(
+                _UniffiLib.uniffi_nameless_rs_fn_method_credentialholder_create_signature_with_accumulator,
+                self._uniffi_clone_pointer(),
+                _UniffiConverterBytes.lower(bytes_to_hash),
+            )
+        )
+
+    def create_updated_credential(self, identifier: "Identifier") -> "CredentialHolder":
+        _UniffiConverterTypeIdentifier.check_lower(identifier)
+
+        return _UniffiConverterTypeCredentialHolder.lift(
+            _uniffi_rust_call(
+                _UniffiLib.uniffi_nameless_rs_fn_method_credentialholder_create_updated_credential,
+                self._uniffi_clone_pointer(),
+                _UniffiConverterTypeIdentifier.lower(identifier),
+            )
+        )
+
+    def export_cbor(
+        self,
+    ) -> "bytes":
+        return _UniffiConverterBytes.lift(
+            _uniffi_rust_call_with_error(
+                _UniffiConverterTypeApiError,
+                _UniffiLib.uniffi_nameless_rs_fn_method_credentialholder_export_cbor,
+                self._uniffi_clone_pointer(),
+            )
+        )
+
+    def export_json(
+        self,
+    ) -> "str":
+        return _UniffiConverterString.lift(
+            _uniffi_rust_call_with_error(
+                _UniffiConverterTypeApiError,
+                _UniffiLib.uniffi_nameless_rs_fn_method_credentialholder_export_json,
+                self._uniffi_clone_pointer(),
+            )
+        )
+
+    def get_credential(
+        self,
+    ) -> "Credential":
+        return _UniffiConverterTypeCredential.lift(
+            _uniffi_rust_call(
+                _UniffiLib.uniffi_nameless_rs_fn_method_credentialholder_get_credential,
+                self._uniffi_clone_pointer(),
+            )
+        )
+
+    def get_group_parameters(
+        self,
+    ) -> "GroupParameters":
+        return _UniffiConverterTypeGroupParameters.lift(
+            _uniffi_rust_call(
+                _UniffiLib.uniffi_nameless_rs_fn_method_credentialholder_get_group_parameters,
+                self._uniffi_clone_pointer(),
+            )
+        )
+
+    def get_identifier(
+        self,
+    ) -> "Identifier":
+        return _UniffiConverterTypeIdentifier.lift(
+            _uniffi_rust_call(
+                _UniffiLib.uniffi_nameless_rs_fn_method_credentialholder_get_identifier,
+                self._uniffi_clone_pointer(),
+            )
+        )
+
+    def get_last_valid_accumulator(
+        self,
+    ) -> "SignedAccumulatorValue":
+        return _UniffiConverterTypeSignedAccumulatorValue.lift(
+            _uniffi_rust_call(
+                _UniffiLib.uniffi_nameless_rs_fn_method_credentialholder_get_last_valid_accumulator,
+                self._uniffi_clone_pointer(),
+            )
+        )
+
+    def get_public_key(
+        self,
+    ) -> "PublicKey":
+        return _UniffiConverterTypePublicKey.lift(
+            _uniffi_rust_call(
+                _UniffiLib.uniffi_nameless_rs_fn_method_credentialholder_get_public_key,
+                self._uniffi_clone_pointer(),
+            )
+        )
+
+    def switch_at_index(self, index: "int") -> None:
+        _UniffiConverterUInt32.check_lower(index)
+
+        _uniffi_rust_call(
+            _UniffiLib.uniffi_nameless_rs_fn_method_credentialholder_switch_at_index,
+            self._uniffi_clone_pointer(),
+            _UniffiConverterUInt32.lower(index),
+        )
+
+
+class _UniffiConverterTypeCredentialHolder:
+
+    @staticmethod
+    def lift(value: int):
+        return CredentialHolder._make_instance_(value)
+
+    @staticmethod
+    def check_lower(value: CredentialHolder):
+        if not isinstance(value, CredentialHolder):
+            raise TypeError(
+                "Expected CredentialHolder instance, {} found".format(
+                    type(value).__name__
+                )
+            )
+
+    @staticmethod
+    def lower(value: CredentialHolderProtocol):
+        if not isinstance(value, CredentialHolder):
+            raise TypeError(
+                "Expected CredentialHolder instance, {} found".format(
+                    type(value).__name__
+                )
+            )
+        return value._uniffi_clone_pointer()
+
+    @classmethod
+    def read(cls, buf: _UniffiRustBuffer):
+        ptr = buf.read_u64()
+        if ptr == 0:
+            raise InternalError("Raw pointer value was null")
+        return cls.lift(ptr)
+
+    @classmethod
+    def write(cls, value: CredentialHolderProtocol, buf: _UniffiRustBuffer):
+        buf.write_u64(cls.lower(value))
+
+
 class CredentialRequestProtocol(typing.Protocol):
     """
     A full credential request, the entire information needed to request a credential from the issuer.
@@ -5348,7 +6068,7 @@ class CredentialRequestProtocol(typing.Protocol):
     ):
         raise NotImplementedError
 
-    def get_public_attributes(
+    def get_attribute_list(
         self,
     ):
         raise NotImplementedError
@@ -5436,12 +6156,12 @@ class CredentialRequest:
             )
         )
 
-    def get_public_attributes(
+    def get_attribute_list(
         self,
     ) -> "CredentialRequestAttributeList":
         return _UniffiConverterTypeCredentialRequestAttributeList.lift(
             _uniffi_rust_call(
-                _UniffiLib.uniffi_nameless_rs_fn_method_credentialrequest_get_public_attributes,
+                _UniffiLib.uniffi_nameless_rs_fn_method_credentialrequest_get_attribute_list,
                 self._uniffi_clone_pointer(),
             )
         )
@@ -6057,350 +6777,6 @@ class _UniffiConverterTypeGroupParameters:
         buf.write_u64(cls.lower(value))
 
 
-class HolderProtocol(typing.Protocol):
-    def create_signature(self, bytes_to_hash: "bytes"):
-        raise NotImplementedError
-
-    def create_signature_with_accumulator(self, bytes_to_hash: "bytes"):
-        raise NotImplementedError
-
-    def export_cbor(
-        self,
-    ):
-        raise NotImplementedError
-
-    def export_json(
-        self,
-    ):
-        raise NotImplementedError
-
-    def get_credential(
-        self,
-    ):
-        raise NotImplementedError
-
-    def get_group_parameters(
-        self,
-    ):
-        raise NotImplementedError
-
-    def get_last_valid_accumulator(
-        self,
-    ):
-        raise NotImplementedError
-
-    def get_public_key(
-        self,
-    ):
-        raise NotImplementedError
-
-
-class Holder:
-    _pointer: ctypes.c_void_p
-
-    def __init__(
-        self,
-        holder_builder: "HolderBuilder",
-        credential_attributes: "CredentialAttributeList",
-        credential_secret: "CredentialSecret",
-    ):
-        _UniffiConverterTypeHolderBuilder.check_lower(holder_builder)
-
-        _UniffiConverterTypeCredentialAttributeList.check_lower(credential_attributes)
-
-        _UniffiConverterTypeCredentialSecret.check_lower(credential_secret)
-
-        self._pointer = _uniffi_rust_call(
-            _UniffiLib.uniffi_nameless_rs_fn_constructor_holder_new,
-            _UniffiConverterTypeHolderBuilder.lower(holder_builder),
-            _UniffiConverterTypeCredentialAttributeList.lower(credential_attributes),
-            _UniffiConverterTypeCredentialSecret.lower(credential_secret),
-        )
-
-    def __del__(self):
-        # In case of partial initialization of instances.
-        pointer = getattr(self, "_pointer", None)
-        if pointer is not None:
-            _uniffi_rust_call(_UniffiLib.uniffi_nameless_rs_fn_free_holder, pointer)
-
-    def _uniffi_clone_pointer(self):
-        return _uniffi_rust_call(
-            _UniffiLib.uniffi_nameless_rs_fn_clone_holder, self._pointer
-        )
-
-    # Used by alternative constructors or any methods which return this type.
-    @classmethod
-    def _make_instance_(cls, pointer):
-        # Lightly yucky way to bypass the usual __init__ logic
-        # and just create a new instance with the required pointer.
-        inst = cls.__new__(cls)
-        inst._pointer = pointer
-        return inst
-
-    @classmethod
-    def import_cbor(cls, data: "bytes"):
-        _UniffiConverterBytes.check_lower(data)
-
-        # Call the (fallible) function before creating any half-baked object instances.
-        pointer = _uniffi_rust_call_with_error(
-            _UniffiConverterTypeApiError,
-            _UniffiLib.uniffi_nameless_rs_fn_constructor_holder_import_cbor,
-            _UniffiConverterBytes.lower(data),
-        )
-        return cls._make_instance_(pointer)
-
-    @classmethod
-    def import_json(cls, data: "str"):
-        _UniffiConverterString.check_lower(data)
-
-        # Call the (fallible) function before creating any half-baked object instances.
-        pointer = _uniffi_rust_call_with_error(
-            _UniffiConverterTypeApiError,
-            _UniffiLib.uniffi_nameless_rs_fn_constructor_holder_import_json,
-            _UniffiConverterString.lower(data),
-        )
-        return cls._make_instance_(pointer)
-
-    def create_signature(self, bytes_to_hash: "bytes") -> "NamelessSignature":
-        _UniffiConverterBytes.check_lower(bytes_to_hash)
-
-        return _UniffiConverterTypeNamelessSignature.lift(
-            _uniffi_rust_call(
-                _UniffiLib.uniffi_nameless_rs_fn_method_holder_create_signature,
-                self._uniffi_clone_pointer(),
-                _UniffiConverterBytes.lower(bytes_to_hash),
-            )
-        )
-
-    def create_signature_with_accumulator(
-        self, bytes_to_hash: "bytes"
-    ) -> "NamelessSignatureWithAccumulator":
-        _UniffiConverterBytes.check_lower(bytes_to_hash)
-
-        return _UniffiConverterTypeNamelessSignatureWithAccumulator.lift(
-            _uniffi_rust_call(
-                _UniffiLib.uniffi_nameless_rs_fn_method_holder_create_signature_with_accumulator,
-                self._uniffi_clone_pointer(),
-                _UniffiConverterBytes.lower(bytes_to_hash),
-            )
-        )
-
-    def export_cbor(
-        self,
-    ) -> "bytes":
-        return _UniffiConverterBytes.lift(
-            _uniffi_rust_call_with_error(
-                _UniffiConverterTypeApiError,
-                _UniffiLib.uniffi_nameless_rs_fn_method_holder_export_cbor,
-                self._uniffi_clone_pointer(),
-            )
-        )
-
-    def export_json(
-        self,
-    ) -> "str":
-        return _UniffiConverterString.lift(
-            _uniffi_rust_call_with_error(
-                _UniffiConverterTypeApiError,
-                _UniffiLib.uniffi_nameless_rs_fn_method_holder_export_json,
-                self._uniffi_clone_pointer(),
-            )
-        )
-
-    def get_credential(
-        self,
-    ) -> "Credential":
-        return _UniffiConverterTypeCredential.lift(
-            _uniffi_rust_call(
-                _UniffiLib.uniffi_nameless_rs_fn_method_holder_get_credential,
-                self._uniffi_clone_pointer(),
-            )
-        )
-
-    def get_group_parameters(
-        self,
-    ) -> "GroupParameters":
-        return _UniffiConverterTypeGroupParameters.lift(
-            _uniffi_rust_call(
-                _UniffiLib.uniffi_nameless_rs_fn_method_holder_get_group_parameters,
-                self._uniffi_clone_pointer(),
-            )
-        )
-
-    def get_last_valid_accumulator(
-        self,
-    ) -> "SignedAccumulatorValue":
-        return _UniffiConverterTypeSignedAccumulatorValue.lift(
-            _uniffi_rust_call(
-                _UniffiLib.uniffi_nameless_rs_fn_method_holder_get_last_valid_accumulator,
-                self._uniffi_clone_pointer(),
-            )
-        )
-
-    def get_public_key(
-        self,
-    ) -> "PublicKey":
-        return _UniffiConverterTypePublicKey.lift(
-            _uniffi_rust_call(
-                _UniffiLib.uniffi_nameless_rs_fn_method_holder_get_public_key,
-                self._uniffi_clone_pointer(),
-            )
-        )
-
-
-class _UniffiConverterTypeHolder:
-
-    @staticmethod
-    def lift(value: int):
-        return Holder._make_instance_(value)
-
-    @staticmethod
-    def check_lower(value: Holder):
-        if not isinstance(value, Holder):
-            raise TypeError(
-                "Expected Holder instance, {} found".format(type(value).__name__)
-            )
-
-    @staticmethod
-    def lower(value: HolderProtocol):
-        if not isinstance(value, Holder):
-            raise TypeError(
-                "Expected Holder instance, {} found".format(type(value).__name__)
-            )
-        return value._uniffi_clone_pointer()
-
-    @classmethod
-    def read(cls, buf: _UniffiRustBuffer):
-        ptr = buf.read_u64()
-        if ptr == 0:
-            raise InternalError("Raw pointer value was null")
-        return cls.lift(ptr)
-
-    @classmethod
-    def write(cls, value: HolderProtocol, buf: _UniffiRustBuffer):
-        buf.write_u64(cls.lower(value))
-
-
-class HolderBuilderProtocol(typing.Protocol):
-    def export_cbor(
-        self,
-    ):
-        raise NotImplementedError
-
-    def export_json(
-        self,
-    ):
-        raise NotImplementedError
-
-
-class HolderBuilder:
-    _pointer: ctypes.c_void_p
-
-    def __init__(self, *args, **kwargs):
-        raise ValueError("This class has no default constructor")
-
-    def __del__(self):
-        # In case of partial initialization of instances.
-        pointer = getattr(self, "_pointer", None)
-        if pointer is not None:
-            _uniffi_rust_call(
-                _UniffiLib.uniffi_nameless_rs_fn_free_holderbuilder, pointer
-            )
-
-    def _uniffi_clone_pointer(self):
-        return _uniffi_rust_call(
-            _UniffiLib.uniffi_nameless_rs_fn_clone_holderbuilder, self._pointer
-        )
-
-    # Used by alternative constructors or any methods which return this type.
-    @classmethod
-    def _make_instance_(cls, pointer):
-        # Lightly yucky way to bypass the usual __init__ logic
-        # and just create a new instance with the required pointer.
-        inst = cls.__new__(cls)
-        inst._pointer = pointer
-        return inst
-
-    @classmethod
-    def import_cbor(cls, data: "bytes"):
-        _UniffiConverterBytes.check_lower(data)
-
-        # Call the (fallible) function before creating any half-baked object instances.
-        pointer = _uniffi_rust_call_with_error(
-            _UniffiConverterTypeApiError,
-            _UniffiLib.uniffi_nameless_rs_fn_constructor_holderbuilder_import_cbor,
-            _UniffiConverterBytes.lower(data),
-        )
-        return cls._make_instance_(pointer)
-
-    @classmethod
-    def import_json(cls, data: "str"):
-        _UniffiConverterString.check_lower(data)
-
-        # Call the (fallible) function before creating any half-baked object instances.
-        pointer = _uniffi_rust_call_with_error(
-            _UniffiConverterTypeApiError,
-            _UniffiLib.uniffi_nameless_rs_fn_constructor_holderbuilder_import_json,
-            _UniffiConverterString.lower(data),
-        )
-        return cls._make_instance_(pointer)
-
-    def export_cbor(
-        self,
-    ) -> "bytes":
-        return _UniffiConverterBytes.lift(
-            _uniffi_rust_call_with_error(
-                _UniffiConverterTypeApiError,
-                _UniffiLib.uniffi_nameless_rs_fn_method_holderbuilder_export_cbor,
-                self._uniffi_clone_pointer(),
-            )
-        )
-
-    def export_json(
-        self,
-    ) -> "str":
-        return _UniffiConverterString.lift(
-            _uniffi_rust_call_with_error(
-                _UniffiConverterTypeApiError,
-                _UniffiLib.uniffi_nameless_rs_fn_method_holderbuilder_export_json,
-                self._uniffi_clone_pointer(),
-            )
-        )
-
-
-class _UniffiConverterTypeHolderBuilder:
-
-    @staticmethod
-    def lift(value: int):
-        return HolderBuilder._make_instance_(value)
-
-    @staticmethod
-    def check_lower(value: HolderBuilder):
-        if not isinstance(value, HolderBuilder):
-            raise TypeError(
-                "Expected HolderBuilder instance, {} found".format(type(value).__name__)
-            )
-
-    @staticmethod
-    def lower(value: HolderBuilderProtocol):
-        if not isinstance(value, HolderBuilder):
-            raise TypeError(
-                "Expected HolderBuilder instance, {} found".format(type(value).__name__)
-            )
-        return value._uniffi_clone_pointer()
-
-    @classmethod
-    def read(cls, buf: _UniffiRustBuffer):
-        ptr = buf.read_u64()
-        if ptr == 0:
-            raise InternalError("Raw pointer value was null")
-        return cls.lift(ptr)
-
-    @classmethod
-    def write(cls, value: HolderBuilderProtocol, buf: _UniffiRustBuffer):
-        buf.write_u64(cls.lower(value))
-
-
 class IdentifierProtocol(typing.Protocol):
     """
     The user's identifier, signed by the Issuing Key.
@@ -7009,7 +7385,7 @@ class MonolithicIssuer:
             )
         )
 
-    def issue(self, credential_request: "CredentialRequest") -> "HolderBuilder":
+    def issue(self, credential_request: "CredentialRequest") -> "PartialCredential":
         """
         Issue a HolderBuilder, the remote information needed to construct a holder. Combined with a holders
         local information, this will construct a credential.
@@ -7023,7 +7399,7 @@ class MonolithicIssuer:
 
         _UniffiConverterTypeCredentialRequest.check_lower(credential_request)
 
-        return _UniffiConverterTypeHolderBuilder.lift(
+        return _UniffiConverterTypePartialCredential.lift(
             _uniffi_rust_call_with_error(
                 _UniffiConverterTypeApiError,
                 _UniffiLib.uniffi_nameless_rs_fn_method_monolithicissuer_issue,
@@ -7128,7 +7504,7 @@ class NamelessSignatureProtocol(typing.Protocol):
     ):
         raise NotImplementedError
 
-    def get_public_attributes(
+    def get_attribute_list(
         self,
     ):
         raise NotImplementedError
@@ -7253,12 +7629,12 @@ class NamelessSignature:
             )
         )
 
-    def get_public_attributes(
+    def get_attribute_list(
         self,
     ) -> "SignatureAttributeList":
         return _UniffiConverterTypeSignatureAttributeList.lift(
             _uniffi_rust_call(
-                _UniffiLib.uniffi_nameless_rs_fn_method_namelesssignature_get_public_attributes,
+                _UniffiLib.uniffi_nameless_rs_fn_method_namelesssignature_get_attribute_list,
                 self._uniffi_clone_pointer(),
             )
         )
@@ -7350,6 +7726,11 @@ class NamelessSignatureWithAccumulatorProtocol(typing.Protocol):
         raise NotImplementedError
 
     def get_accumulator(
+        self,
+    ):
+        raise NotImplementedError
+
+    def get_attribute_list(
         self,
     ):
         raise NotImplementedError
@@ -7466,6 +7847,16 @@ class NamelessSignatureWithAccumulator:
         return _UniffiConverterTypeSignedAccumulatorValue.lift(
             _uniffi_rust_call(
                 _UniffiLib.uniffi_nameless_rs_fn_method_namelesssignaturewithaccumulator_get_accumulator,
+                self._uniffi_clone_pointer(),
+            )
+        )
+
+    def get_attribute_list(
+        self,
+    ) -> "SignatureAttributeList":
+        return _UniffiConverterTypeSignatureAttributeList.lift(
+            _uniffi_rust_call(
+                _UniffiLib.uniffi_nameless_rs_fn_method_namelesssignaturewithaccumulator_get_attribute_list,
                 self._uniffi_clone_pointer(),
             )
         )
@@ -7767,6 +8158,145 @@ class _UniffiConverterTypeOpeningKey:
 
     @classmethod
     def write(cls, value: OpeningKeyProtocol, buf: _UniffiRustBuffer):
+        buf.write_u64(cls.lower(value))
+
+
+class PartialCredentialProtocol(typing.Protocol):
+    def export_cbor(
+        self,
+    ):
+        raise NotImplementedError
+
+    def export_json(
+        self,
+    ):
+        raise NotImplementedError
+
+    def validate(
+        self,
+    ):
+        raise NotImplementedError
+
+
+class PartialCredential:
+    _pointer: ctypes.c_void_p
+
+    def __init__(self, *args, **kwargs):
+        raise ValueError("This class has no default constructor")
+
+    def __del__(self):
+        # In case of partial initialization of instances.
+        pointer = getattr(self, "_pointer", None)
+        if pointer is not None:
+            _uniffi_rust_call(
+                _UniffiLib.uniffi_nameless_rs_fn_free_partialcredential, pointer
+            )
+
+    def _uniffi_clone_pointer(self):
+        return _uniffi_rust_call(
+            _UniffiLib.uniffi_nameless_rs_fn_clone_partialcredential, self._pointer
+        )
+
+    # Used by alternative constructors or any methods which return this type.
+    @classmethod
+    def _make_instance_(cls, pointer):
+        # Lightly yucky way to bypass the usual __init__ logic
+        # and just create a new instance with the required pointer.
+        inst = cls.__new__(cls)
+        inst._pointer = pointer
+        return inst
+
+    @classmethod
+    def import_cbor(cls, data: "bytes"):
+        _UniffiConverterBytes.check_lower(data)
+
+        # Call the (fallible) function before creating any half-baked object instances.
+        pointer = _uniffi_rust_call_with_error(
+            _UniffiConverterTypeApiError,
+            _UniffiLib.uniffi_nameless_rs_fn_constructor_partialcredential_import_cbor,
+            _UniffiConverterBytes.lower(data),
+        )
+        return cls._make_instance_(pointer)
+
+    @classmethod
+    def import_json(cls, data: "str"):
+        _UniffiConverterString.check_lower(data)
+
+        # Call the (fallible) function before creating any half-baked object instances.
+        pointer = _uniffi_rust_call_with_error(
+            _UniffiConverterTypeApiError,
+            _UniffiLib.uniffi_nameless_rs_fn_constructor_partialcredential_import_json,
+            _UniffiConverterString.lower(data),
+        )
+        return cls._make_instance_(pointer)
+
+    def export_cbor(
+        self,
+    ) -> "bytes":
+        return _UniffiConverterBytes.lift(
+            _uniffi_rust_call_with_error(
+                _UniffiConverterTypeApiError,
+                _UniffiLib.uniffi_nameless_rs_fn_method_partialcredential_export_cbor,
+                self._uniffi_clone_pointer(),
+            )
+        )
+
+    def export_json(
+        self,
+    ) -> "str":
+        return _UniffiConverterString.lift(
+            _uniffi_rust_call_with_error(
+                _UniffiConverterTypeApiError,
+                _UniffiLib.uniffi_nameless_rs_fn_method_partialcredential_export_json,
+                self._uniffi_clone_pointer(),
+            )
+        )
+
+    def validate(
+        self,
+    ) -> "bool":
+        return _UniffiConverterBool.lift(
+            _uniffi_rust_call(
+                _UniffiLib.uniffi_nameless_rs_fn_method_partialcredential_validate,
+                self._uniffi_clone_pointer(),
+            )
+        )
+
+
+class _UniffiConverterTypePartialCredential:
+
+    @staticmethod
+    def lift(value: int):
+        return PartialCredential._make_instance_(value)
+
+    @staticmethod
+    def check_lower(value: PartialCredential):
+        if not isinstance(value, PartialCredential):
+            raise TypeError(
+                "Expected PartialCredential instance, {} found".format(
+                    type(value).__name__
+                )
+            )
+
+    @staticmethod
+    def lower(value: PartialCredentialProtocol):
+        if not isinstance(value, PartialCredential):
+            raise TypeError(
+                "Expected PartialCredential instance, {} found".format(
+                    type(value).__name__
+                )
+            )
+        return value._uniffi_clone_pointer()
+
+    @classmethod
+    def read(cls, buf: _UniffiRustBuffer):
+        ptr = buf.read_u64()
+        if ptr == 0:
+            raise InternalError("Raw pointer value was null")
+        return cls.lift(ptr)
+
+    @classmethod
+    def write(cls, value: PartialCredentialProtocol, buf: _UniffiRustBuffer):
         buf.write_u64(cls.lower(value))
 
 
@@ -8813,6 +9343,32 @@ class ApiError:  # type: ignore
 
     _UniffiTempApiError.InvalidCredentialRequest = InvalidCredentialRequest  # type: ignore
 
+    class InvalidPartialCredential(_UniffiTempApiError):
+        """
+        A partial credential failed to verify against it's group parameters.
+        """
+
+        def __init__(self):
+            pass
+
+        def __repr__(self):
+            return "ApiError.InvalidPartialCredential({})".format(str(self))
+
+    _UniffiTempApiError.InvalidPartialCredential = InvalidPartialCredential  # type: ignore
+
+    class IdentifierNotInAccumulator(_UniffiTempApiError):
+        """
+        A lookup failed to find a valid identifier in the accumulator store.
+        """
+
+        def __init__(self):
+            pass
+
+        def __repr__(self):
+            return "ApiError.IdentifierNotInAccumulator({})".format(str(self))
+
+    _UniffiTempApiError.IdentifierNotInAccumulator = IdentifierNotInAccumulator  # type: ignore
+
 
 ApiError = _UniffiTempApiError  # type: ignore
 del _UniffiTempApiError
@@ -8832,6 +9388,10 @@ class _UniffiConverterTypeApiError(_UniffiConverterRustBuffer):
             return ApiError.InvalidDigitsInRadix()
         if variant == 5:
             return ApiError.InvalidCredentialRequest()
+        if variant == 6:
+            return ApiError.InvalidPartialCredential()
+        if variant == 7:
+            return ApiError.IdentifierNotInAccumulator()
         raise InternalError("Raw enum value doesn't match any cases")
 
     @staticmethod
@@ -8846,6 +9406,10 @@ class _UniffiConverterTypeApiError(_UniffiConverterRustBuffer):
             return
         if isinstance(value, ApiError.InvalidCredentialRequest):
             return
+        if isinstance(value, ApiError.InvalidPartialCredential):
+            return
+        if isinstance(value, ApiError.IdentifierNotInAccumulator):
+            return
 
     @staticmethod
     def write(value, buf):
@@ -8859,6 +9423,10 @@ class _UniffiConverterTypeApiError(_UniffiConverterRustBuffer):
             buf.write_i32(4)
         if isinstance(value, ApiError.InvalidCredentialRequest):
             buf.write_i32(5)
+        if isinstance(value, ApiError.InvalidPartialCredential):
+            buf.write_i32(6)
+        if isinstance(value, ApiError.IdentifierNotInAccumulator):
+            buf.write_i32(7)
 
 
 class AttributeType(enum.Enum):
@@ -9009,13 +9577,13 @@ __all__ = [
     "Credential",
     "CredentialAttribute",
     "CredentialAttributeList",
+    "CredentialBuilder",
+    "CredentialHolder",
     "CredentialRequest",
     "CredentialRequestAttribute",
     "CredentialRequestAttributeList",
     "CredentialSecret",
     "GroupParameters",
-    "Holder",
-    "HolderBuilder",
     "Identifier",
     "IdentifierBuilder",
     "IssuingKey",
@@ -9024,6 +9592,7 @@ __all__ = [
     "NamelessSignatureWithAccumulator",
     "Opener",
     "OpeningKey",
+    "PartialCredential",
     "PublicGroupInformation",
     "PublicKey",
     "SignatureAttribute",

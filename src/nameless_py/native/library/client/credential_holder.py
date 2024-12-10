@@ -1,96 +1,93 @@
 from typing import TypedDict
-from pydantic import BaseModel
 from nameless_py.ffi.nameless_rs import *
 from nameless_py.native.library.types.attributes import (
     NativeAttributeList,
-    AttributeListModel,
 )
-import json
 
 
-# TODO: I'm Not Sure If This Is The Correct Schema.
-class ParsedCredentialAttribute(BaseModel):
-    value: str
-    attribute_type: AttributeType
+###
+# Exceptions
+###
+
+
+class CredentialHolderError(Exception):
+    """Base exception for credential holder errors"""
+
+    pass
+
+
+class CredentialInitializationError(CredentialHolderError):
+    """Error initializing credential holder"""
+
+    pass
+
+
+class AttributeListError(CredentialHolderError):
+    """Error accessing or processing attribute list"""
+
+    pass
+
+
+class SignatureError(CredentialHolderError):
+    """Error creating credential signature"""
+
+    pass
+
+
+class UpdateError(CredentialHolderError):
+    """Error during credential update operations"""
+
+    pass
+
+
+###
+# Credential Holder
+###
 
 
 class HolderParams(TypedDict):
-    holder_builder: HolderBuilder
+    holder_builder: PartialCredential
     credential_attributes: CredentialAttributeList
     credential_secret: CredentialSecret
 
 
 class NativeCredentialHolder:
     def __init__(self, params: HolderParams) -> None:
-        """Initialize a Holder from a HolderBuilder, CredentialAttributeList, and CredentialSecret"""
+        """Initialize a Holder from a PartialCredential, CredentialAttributeList, and CredentialSecret"""
         try:
-            self.holder = Holder(
+            self.holder = CredentialHolder(
                 params["holder_builder"],
                 params["credential_attributes"],
                 params["credential_secret"],
             )
+        except ValueError as e:
+            raise CredentialInitializationError(f"Invalid parameters: {e}")
         except Exception as e:
-            raise RuntimeError(f"Failed to initialize holder: {e}")
+            raise CredentialInitializationError(f"Failed to initialize holder: {e}")
 
     def _get_attribute_list_from_credential(self) -> CredentialAttributeList:
         """Get the attribute list from the credential"""
         try:
             credential = self.holder.get_credential()
-            return credential.get_credential_attribute_list()
+            return credential.get_attribute_list()
+        except AttributeError as e:
+            raise AttributeListError("Credential not properly initialized")
         except Exception as e:
-            raise RuntimeError(f"Failed to get attribute list: {e}")
-
-    def _parse_and_validate_attribute_list(
-        self, attribute_list: CredentialAttributeList
-    ) -> list[ParsedCredentialAttribute]:
-        """Validate the message format"""
-        try:
-            # TODO: I'm Not Sure If I'm Validating And Parsing The Attribute List Correctly
-            messages_json_str = attribute_list.export_json()
-            messages_json = json.loads(messages_json_str)
-            return [ParsedCredentialAttribute(**msg) for msg in messages_json]
-        except ValueError as e:
-            raise RuntimeError(f"Failed to validate credential messages: {e}")
-        except TypeError as e:
-            raise RuntimeError(f"Invalid message format in credential: {e}")
-
-    def _format_messages(
-        self, validated_messages: list[ParsedCredentialAttribute]
-    ) -> list[dict]:
-        """Format messages with visibility and value"""
-        try:
-            return [
-                {
-                    "visibility": (
-                        "public"
-                        if msg.attribute_type == AttributeType.PUBLIC
-                        else "private"
-                    ),
-                    "value": msg.value,
-                }
-                for msg in validated_messages
-            ]
-        except Exception as e:
-            raise RuntimeError(f"Failed to format credential messages: {e}")
-
-    def _create_attribute_list(
-        self, formatted_messages: list[dict]
-    ) -> NativeAttributeList:
-        """Create a NativeAttributeList from formatted messages"""
-        try:
-            message_list = AttributeListModel.model_validate(formatted_messages)
-            return message_list.to_attribute_list()
-        except Exception as e:
-            raise RuntimeError(f"Failed to recover message list: {e}")
+            raise AttributeListError(f"Failed to get attribute list: {e}")
 
     def _extract_attribute_list_from_credential(self) -> NativeAttributeList:
         """Extract messages from the credential and return as NativeAttributeList"""
-        attribute_list = self._get_attribute_list_from_credential()
-        validated_messages = self._parse_and_validate_attribute_list(attribute_list)
-        formatted_messages = self._format_messages(validated_messages)
-        return self._create_attribute_list(formatted_messages)
+        try:
+            attribute_list_json = (
+                self._get_attribute_list_from_credential().export_json()
+            )
+            return NativeAttributeList.from_json(attribute_list_json)
+        except ValueError as e:
+            raise AttributeListError(f"Invalid attribute list format: {e}")
+        except Exception as e:
+            raise AttributeListError(f"Failed to extract attribute list: {e}")
 
-    def read_credential(self, unsafe: bool = False) -> NativeAttributeList:
+    def read_attribute_list(self, unsafe: bool = False) -> NativeAttributeList:
         """Read credential messages, optionally hiding private messages"""
         try:
             message_list = self._extract_attribute_list_from_credential()
@@ -100,16 +97,28 @@ class NativeCredentialHolder:
                 return NativeAttributeList.from_attribute_list(
                     message_list.get_public_attributes()
                 )
+        except AttributeListError:
+            raise
         except Exception as e:
-            raise RuntimeError(f"Failed to read credential safely: {e}")
+            raise AttributeListError(f"Failed to read credential attributes: {e}")
 
-    def request_credential_update(self) -> bytes:
+    def request_credential_update(self) -> Identifier:
         """Request a credential update"""
-        raise NotImplementedError("request_credential_update not implemented")
+        try:
+            return self.holder.get_identifier()
+        except AttributeError:
+            raise UpdateError("Credential not properly initialized")
+        except Exception as e:
+            raise UpdateError(f"Failed to request credential update: {e}")
 
-    def import_credential_update(self, credential_update: bytes) -> None:
+    def import_credential_update(self, identifier: Identifier) -> None:
         """Import a credential update"""
-        raise NotImplementedError("import_credential_update not implemented")
+        try:
+            self.holder = self.holder.create_updated_credential(identifier)
+        except ValueError as e:
+            raise UpdateError(f"Invalid update identifier: {e}")
+        except Exception as e:
+            raise UpdateError(f"Failed to import credential update: {e}")
 
     def sign_with_credential(
         self, data_to_prove: bytes, public_indices: list[int]
@@ -118,5 +127,7 @@ class NativeCredentialHolder:
         try:
             signature = self.holder.create_signature_with_accumulator(data_to_prove)
             return signature.export_cbor()
+        except ValueError as e:
+            raise SignatureError(f"Invalid signature parameters: {e}")
         except Exception as e:
-            raise RuntimeError(f"Failed to sign with credential: {e}")
+            raise SignatureError(f"Failed to create signature: {e}")

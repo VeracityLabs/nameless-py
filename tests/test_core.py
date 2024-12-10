@@ -6,6 +6,7 @@ from nameless_py.native.library.client.credential_builder import (
     NativeCredentialHolder,
 )
 import os
+import json
 
 
 def test_issuer() -> None:
@@ -79,8 +80,9 @@ def test_credential_issuing() -> None:
 
     # Create a credential request
     credential_request = builder.request_credential()
-
-    print("Public Attributes, JSON: ", credential_request.get_public_attributes().export_json())
+    validated_attrs = NativeAttributeList.from_json(
+        credential_request.get_attribute_list().export_json()
+    )
 
     # Issue the credential
     requested_credential = issuer.issue(credential_request)
@@ -115,7 +117,7 @@ def test_conditional_issuance() -> None:
 
     # Create a credential request
     credential_request = builder.request_credential()
-    public_attributes = credential_request.get_public_attributes()
+    public_attributes = credential_request.get_attribute_list()
 
     # TODO: update test when it's possible to inspect public attributes, and know the index of the private attribute
 
