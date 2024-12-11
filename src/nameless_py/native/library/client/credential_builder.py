@@ -1,4 +1,12 @@
-from nameless_py.ffi.nameless_rs import *
+from nameless_py.ffi.nameless_rs import (
+    CredentialAttribute,
+    CredentialAttributeList,
+    CredentialRequest,
+    PartialCredential,
+    GroupParameters,
+    CredentialSecret,
+    AttributeType,
+)
 from nameless_py.native.library.types.attributes import (
     NativeAttributeList,
     AttributeTypes,

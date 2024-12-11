@@ -1,6 +1,14 @@
-from nameless_py.ffi.nameless_rs import *
+from nameless_py.ffi.nameless_rs import (
+    NamelessSignature,
+    PublicKey,
+    GroupParameters,
+    AccumulatorValue,
+    AccumulatorSignature,
+    NamelessSignatureWithAccumulator,
+    NamelessSignature,
+)
 from nameless_py.native.library.types.attributes import NativeAttributeList
-from nameless_py.native.library.types.accumulator import AccumulatorVerifier
+from nameless_py.native.library.types.accumulator import AccumulatorVerifierType
 from dataclasses import dataclass
 from typing import Protocol, Union, TypedDict
 from pydantic import BaseModel
@@ -57,7 +65,7 @@ class VerifiableSignatureProtocol(Protocol):
 
     def get_accumulator_signature(self) -> AccumulatorSignature: ...
 
-    def get_accumulator_verifier(self) -> AccumulatorVerifier: ...
+    def get_accumulator_verifier(self) -> AccumulatorVerifierType: ...
 
     def get_attribute_list(self) -> NativeAttributeList: ...
 
@@ -73,7 +81,7 @@ class VerifiableSignatureWithoutAccumulator(VerifiableSignatureProtocol):
     data_hash: bytes
     accumulator_value: AccumulatorValue
     accumulator_signature: AccumulatorSignature
-    accumulator_verifier: AccumulatorVerifier
+    accumulator_verifier: AccumulatorVerifierType
 
     def get_signature_of_data(self) -> NamelessSignature:
         return self.signature
@@ -87,7 +95,7 @@ class VerifiableSignatureWithoutAccumulator(VerifiableSignatureProtocol):
     def get_accumulator_signature(self) -> AccumulatorSignature:
         return self.accumulator_signature
 
-    def get_accumulator_verifier(self) -> AccumulatorVerifier:
+    def get_accumulator_verifier(self) -> AccumulatorVerifierType:
         return self.accumulator_verifier
 
     def get_attribute_list(self) -> NativeAttributeList:
@@ -133,7 +141,7 @@ class VerifiableSignatureWithoutAccumulator(VerifiableSignatureProtocol):
 class VerifiableSignature(VerifiableSignatureProtocol):
     signature: NamelessSignatureWithAccumulator
     data_hash: bytes
-    accumulator_verifier: AccumulatorVerifier
+    accumulator_verifier: AccumulatorVerifierType
 
     def get_signature_of_data(self) -> NamelessSignature:
         return self.signature.get_signature()
@@ -147,7 +155,7 @@ class VerifiableSignature(VerifiableSignatureProtocol):
     def get_accumulator_signature(self) -> AccumulatorSignature:
         return self.signature.get_accumulator().get_signature()
 
-    def get_accumulator_verifier(self) -> AccumulatorVerifier:
+    def get_accumulator_verifier(self) -> AccumulatorVerifierType:
         return self.accumulator_verifier
 
     def get_attribute_list(self) -> NativeAttributeList:

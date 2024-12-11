@@ -1,5 +1,13 @@
-from typing import TypedDict, Optional
-from nameless_py.ffi.nameless_rs import *
+from typing import TypedDict
+from nameless_py.ffi.nameless_rs import (
+    CredentialHolder,
+    Credential,
+    CredentialAttributeList,
+    Identifier,
+    PartialCredential,
+    CredentialSecret,
+    NamelessSignatureWithAccumulator,
+)
 from nameless_py.native.library.types.attributes import (
     NativeAttributeList,
 )

@@ -1,4 +1,10 @@
-from nameless_py.ffi.nameless_rs import *
+from nameless_py.ffi.nameless_rs import (
+    CredentialRequest,
+    CredentialRequestAttributeList,
+    PartialCredential,
+    PublicKey,
+    GroupParameters,
+)
 from typing import Protocol
 
 

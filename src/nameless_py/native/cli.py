@@ -9,7 +9,7 @@ from nameless_py.ffi.nameless_rs import (
     NamelessSignatureWithAccumulator,
 )
 from nameless_py.native.library.client.verify import (
-    AccumulatorVerifier,
+    AccumulatorVerifierType,
     VerifiableSignatureType,
     VerifiableSignature,
 )
@@ -433,7 +433,7 @@ def verify_raw_signature(
         group_parameters_type = GroupParameters.import_cbor(group_parameters_bytes)
 
         # Dummy Accumulator Verifier
-        accumulator_verifier: AccumulatorVerifier = lambda *args, **kwargs: True
+        accumulator_verifier: AccumulatorVerifierType = lambda *args, **kwargs: True
 
         # Verify the signature
         verifiable_object: VerifiableSignatureType = VerifiableSignature(
@@ -502,7 +502,7 @@ def verify_jws_signature(
             raise click.ClickException("JWS file is empty")
 
         # Dummy accumulator verifier for now
-        accumulator_verifier: AccumulatorVerifier = lambda *args, **kwargs: True
+        accumulator_verifier: AccumulatorVerifierType = lambda *args, **kwargs: True
 
         try:
             # Decode JWS model first to validate format

@@ -6,7 +6,7 @@ from nameless_py.native.library.client.credential_holder import NativeCredential
 from nameless_py.native.library.client.verify import (
     VerifiableSignature,
     VerifiableSignatureType,
-    AccumulatorVerifier,
+    AccumulatorVerifierType,
 )
 from nameless_py.ffi.nameless_rs import (
     PublicKey,
@@ -296,13 +296,13 @@ class NamelessJWS:
             raise JWSError(f"Signing failed: {e}")
 
     @staticmethod
-    def verify(jws_string: str, accumulator_verifier: AccumulatorVerifier) -> bool:
+    def verify(jws_string: str, accumulator_verifier: AccumulatorVerifierType) -> bool:
         """
         Verify a JWS token.
 
         Args:
             jws_string (str): The JWS token to verify
-            accumulator_verifier (AccumulatorVerifier): The verifier to use
+            accumulator_verifier (AccumulatorVerifierType): The verifier to use
 
         Returns:
             bool: True if verification succeeds, False otherwise

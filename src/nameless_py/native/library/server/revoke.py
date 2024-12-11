@@ -1,4 +1,6 @@
-from nameless_py.ffi.nameless_rs import *
+from nameless_py.ffi.nameless_rs import (
+    Identifier,
+)
 from typing import Protocol
 
 

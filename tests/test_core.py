@@ -2,7 +2,7 @@ from nameless_py.native.library.client.verify import (
     NativeVerifier,
     NativeVerifierParams,
     VerifiableSignature,
-    AccumulatorVerifier,
+    AccumulatorVerifierType,
 )
 from nameless_py.native.library.server.monolithic import NativeMonolithicIssuer
 from nameless_py.native.library.types.attributes import NativeAttributeList
@@ -181,7 +181,7 @@ def test_signing_and_verifying() -> None:
     signature = holder.sign_with_credential(b"some bullshit", [0])
 
     # Dummy Accumulator Verifier
-    accumulator_verifier: AccumulatorVerifier = lambda x, y: True
+    accumulator_verifier: AccumulatorVerifierType = lambda x, y: True
 
     # Verifiable Thing
     verifiable_thing = VerifiableSignature(
