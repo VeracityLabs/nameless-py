@@ -1,6 +1,6 @@
-# see3_python
+# nameless_py
 
-see3_python is a solution for anonymous credentials.
+nameless_py is a solution for anonymous credentials.
 
 It provides everything you need to generate, manage, and use anonymous credentials.
 
@@ -10,24 +10,35 @@ This includes:
 - A server for issuing and revoking anonymous credentials.
 - A CLI for generating, managing, and using anonymous credentials.
 
-see3_python is part of the See3 SDK, which is implemented for Kotlin, Swift, Expo, TypeScript (Node.js and WASM), Python and Rust. It supports iOS, Android, Linux, MacOS and Windows.
+nameless_py is part of the See3 SDK, which is implemented for Kotlin, Swift, Expo, TypeScript (Node.js and WASM), Python and Rust. It supports iOS, Android, Linux, MacOS and Windows.
 
-Every library in the SDK is compatible with the Python-based See3 server, and they are all [bindings](https://en.wikipedia.org/wiki/Language_binding) to the [Rust implementation](https://github.com/VeracityLabs/see3_rust).
+Every library in the SDK is compatible with the Python-based Nameless server, and they are all [bindings](https://en.wikipedia.org/wiki/Language_binding) to the [Rust implementation](https://github.com/VeracityLabs/nameless_rs).
 
 ## Features
 
-- **Anonymous Credentials**: Generate and manage anonymous credentials.
-- **Signing**: Use credentials to sign messages and other data.
-- **Credential Issuance**: Issue credentials using the built-in `see3-server` command.
-- **Server Management**: Manage server data with the `see3-server-manager` command.
-- **Development Tools**: Includes tox for automated testing and building across Python environments.
+
+
+- **Trusted Issuer**: A designated authority verifies all user attributes (details like name or age). This trusted verification allows users to later prove that the information is correct when sharing it with third parties, if they choose to.
+
+- **Complete Anonymity**: There are points of traceability, even when credentials are reused. When you use `nameless-rs` to share verified details, your actions are completely indistinguishable from those of any other user with the same details. 
+
+- **Selective Disclosure**: You can prove specific details (like being over a certain age) without revealing personal data you'd prefer to keep private (such as your exact birth-date or name).
+
+- **Use-Specific Proofs**: Every proof you generate is uniquely tied to the data it was generated for. This prevents others from reusing your proofs to authorize data which is not yours using your identity.
+
+- **Accountable Privacy**: A cryptographically-secure majority vote among trusted authorities is required to:
+  - Identify problematic credentials in cases of abuse
+  - Enable banning of credentials (moderation) when necessary
+  - Prevent any single corrupt authority from compromising privacy
+
+- **Efficient Revocation**: Our system allows for quick and scalable cancellation of credentials without relying on large revocation lists or frequent status checks (ie, RL or OCSP).
 
 ## Installation
 
 To install the library, use pip:
 
 ```bash
-pip install see3_python
+pip install nameless_py
 ```
 
 ## Building
@@ -46,13 +57,15 @@ pipenv run tox -e build
 
 ## Docker Container
 
-```docker build -t see3-server .
+```bash
+docker build -t nameless-server .
 docker run -p 8000:8000 \
   -e PLAY_INTEGRITY_DECRYPTION_KEY="KEY_HERE" \
   -e PLAY_INTEGRITY_VERIFICATION_KEY="KEY_HERE" \
   -e SERVER_PASSWORD="SERVER_PASSWORD_HERE" \
   -e MAX_CREDENTIAL_MESSAGES="MAX_CREDENTIAL_MESSAGES_HERE" \
-  see3-server```
+  nameless-server
+```
 
 ## Library
 
@@ -93,27 +106,41 @@ The CLI will prompt you to generate a server configuration, which will be encryp
 
 It's a Python script that the server will use to determine whether a credential should be issued or revoked, when the corresponding endpoint is called. 
 
-The use of a Script Conditional keeps the issuing-related logic, key-management separate and server configuration separate from the business logic of your application.
+The use of a Script Conditional keeps the issuing-related logic, key-management and server configuration separate from the business logic of your application.
 
-The Script Conditional must have three functions:
+The Script Conditional must have three functions: issue, revoke, and open.
 
-- `issue(credential_request: bytes, auxiliary_data: object, issue_function: Callable[[bytes], bytes]) -> dict`: Determines whether a credential should be issued.
-- `revoke(user_id: bytes, auxiliary_data: object, revoke_function: Callable[[bytes], bytes]) -> dict`: Determines whether a credential should be revoked.
-- `open(proof_data: bytes, auxiliary_data: object, open_function: Callable[[bytes], bytes]) -> dict`: Determines whether the User ID should be extracted from the proof.
-
-The `dict` returned by each function will be returned to the client when the function is called. 
-
-We strongly recommend that the `dict` you return is consistent with the HTTP `Result` type, as follows:
+Here are the types for the functions:
 
 ```python
-def issue(credential_request: bytes, auxiliary_data: object, issue_function: Callable[[bytes], bytes]) -> dict:
-    if success:
-        return {"status": 200, "result": {}}
-    else:
-        return {"status": 400, "error": {"message": "Error Message"}}
-```
+###
+# Check Types
+###
 
-`see3-server` will automatically infer the status code from the `Result`, when possible.
+# A Function That Checks If A Credential Should Be Issued
+IssueChecks = Callable[
+    # Takes A PartialCredential (Request For A Credential) And Optional Additional Data
+    [PartialCredential, Optional[object]],
+    # .. And Returns A Result With A Literal True If The Checks Pass, And An Error Message If They Fail
+    Result[Literal[True], str],
+]
+
+# A Function That Checks If A User Should Be Revoked
+RevokeChecks = Callable[
+    # Takes An Identifier (The User ID) And Optional Additional Data
+    [Identifier, Optional[object]],
+    # .. And Returns A Result With A Literal True If The Checks Pass, And An Error Message If They Fail
+    Result[Literal[True], str],
+]
+
+# A Function That Checks If A User Should Be Identified From Their Signature
+OpenChecks = Callable[
+    # Takes A NamelessSignature And Optional Additional Data
+    [NamelessSignature, Optional[object]],
+    # .. And Returns A Result With A Literal True If The Checks Pass, And An Error Message If They Fail
+    Result[Literal[True], str],
+]
+```
 
 #### What Else Can I Do?
 
