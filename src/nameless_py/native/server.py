@@ -198,13 +198,14 @@ async def lifespan(app: FastAPI):
             except Exception as e:
                 raise DataManagerError(f"Failed to create server data: {e}")
         else:
-            # Decrypt The Server Data If Silent Mode Is Disabled
-            check_params: CheckServerExistsParams = {
+            # For Checking Whether The Default Server Data Exists
+            check_if_default_exists: CheckServerExistsParams = {
                 "server_data_dir": app.state.server_data_dir,
                 "encrypted_name": "default",
             }
             try:
-                if not app.state.data_manager.exists(check_params):
+                # If The Default Server Data Does Not Exist, Run The Interactive Setup Tool To Create It
+                if not app.state.data_manager.exists(check_if_default_exists):
                     automatic_setup_tool = ServerDataInteraction()
                     params: InteractiveSetupParams = {
                         "server_data_dir": app.state.server_data_dir,
@@ -213,6 +214,7 @@ async def lifespan(app: FastAPI):
                     initial_server_data = generated_server["server_data"]
                     app.state.server_name = generated_server["server_name"]
                 else:
+                    # If The Default Server Data Exists, Decrypt It
                     decrypt_params: DecryptServerParams = {
                         "server_data_dir": app.state.server_data_dir,
                         "encrypted_name": "default",
@@ -672,6 +674,10 @@ def main(
                 "server_data_dir": server_dir or SERVER_DATA_DIR,
                 "encrypted_name": "default",
             }
+            # If The Password Is Already Set, Don't Ask For It.
+            # 
+            # If The Default Server Data Doesn't Exist, Don't Ask For A Password Either:
+            # Since We Will Generate A New Password Interactively, We Can Skip Here.
             if not password and data_manager.exists(params):
                 app.state.password = getpass.getpass("Enter Server Password: ")
                 logger.info("Password Read Successfully.")
