@@ -94,20 +94,31 @@ def list(ctx):
 def change_default(ctx, server_id):
     try:
         if not server_id.isalnum():
-            raise ServerIDFormatError("Server ID must be alphanumeric.")
+            raise ServerIDFormatError("Server ID Must Be Alphanumeric.")
 
         server_dir = ctx.obj["SERVER_DIR"]
         encrypted_name = base64.b64encode(server_id.encode("ascii")).decode("ascii")
         server_data_path = os.path.join(server_dir, encrypted_name)
         default_path = os.path.join(server_dir, "default")
 
+        # Check if server data exists
         if not os.path.exists(server_data_path):
             raise ServerNotFoundError(
-                f"No server data found for server ID: {server_id}"
+                f"No Server Data Found For Server ID: {server_id}"
             )
 
+        # Check if default exists and is a symlink
+        if os.path.exists(default_path):
+            if not os.path.islink(default_path):
+                raise SymlinkError("Default Server Exists But Is Not A Symlink")
+            try:
+                os.unlink(default_path)
+            except OSError as e:
+                raise SymlinkError(f"Failed to Remove Existing Default Symlink: {e}")
+
+        # Create a new symlink to the server data
         SymlinkUtil._create_symlink(server_data_path, default_path)
-        console.print(f"Default server changed to: {server_id}")
+        console.print(f"Default Server Changed To: {server_id}")
 
     except (ServerIDFormatError, ServerNotFoundError) as e:
         console.print("Error:", e, style="bold red")
@@ -129,14 +140,7 @@ def decrypt(ctx, server_id, output_filename, password):
             raise ServerIDFormatError("Server ID must be alphanumeric.")
 
         server_dir = ctx.obj["SERVER_DIR"]
-        salt_manager = SaltManager(os.path.join(server_dir, "salt", "saltfile"))
-        data_manager = ServerDataManager()
-
-        # Get salt
-        try:
-            salt = salt_manager.fetch_or_create()
-        except SaltError as e:
-            raise ServerManagerError(f"Failed to get salt: {e}")
+        data_manager = ServerDataManager(server_dir)
 
         # Prepare encrypted name
         encrypted_name = base64.b64encode(server_id.encode("ascii")).decode("ascii")
@@ -145,9 +149,7 @@ def decrypt(ctx, server_id, output_filename, password):
         try:
             decrypted_data = data_manager.decrypt(
                 {
-                    "server_data_dir": server_dir,
-                    "encrypted_name": encrypted_name,
-                    "salt": salt,
+                    "server_name": encrypted_name,
                     "password": password,
                 }
             )

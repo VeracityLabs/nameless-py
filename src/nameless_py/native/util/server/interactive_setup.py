@@ -2,12 +2,11 @@ from nameless_py.native.util.logging import logger
 from nameless_py.native.util.server.data_manager import (
     ServerDataManager,
     ServerDataError,
-    DecryptServerParams,
+    LoadServerParams,
     CreateServerParams,
 )
-from nameless_py.native.util.encryption.salt_manager import SaltManager
 from nameless_py.native.util.filesystem.symlink_manager import SymlinkUtil
-from nameless_py.config import SERVER_DATA_DIR, SALT_FILE_PATH
+from nameless_py.config import SERVER_DATA_DIR
 from typing import Optional, TypedDict
 import os
 import sys
@@ -70,30 +69,18 @@ class ServerCreationError(ServerSetupError):
 ###
 
 
-class LoadOrCreateParams(TypedDict):
-    server_data_dir: str
-    server_name: str
-    password: str
-    max_messages: int
-
-
 class LoadOrCreateResult(TypedDict):
-    server_data_dir: str
     server_name: str
     server_data: bytes
     password: str
 
 
-class InteractiveSetupParams(TypedDict):
-    server_data_dir: str
-
-
 class ServerDataInteraction:
     """Handles user interaction and configuration for server data management"""
 
-    def __init__(self):
-        self.server_data_manager = ServerDataManager()
-        self.salt_manager = SaltManager(SALT_FILE_PATH)
+    def __init__(self, server_data_manager: ServerDataManager):
+        self.server_data_manager = server_data_manager
+        self.salt_manager = self.server_data_manager.get_salt_manager()
 
     @staticmethod
     def _prompt_for_server_name() -> str:
@@ -147,51 +134,38 @@ class ServerDataInteraction:
                 logger.warning("Invalid input. Please enter 'y' or 'n'.")
                 raise UserConfirmationError("Invalid confirmation input")
 
-    def _load(self, params: LoadOrCreateParams) -> LoadOrCreateResult:
+    def _load(self, params: LoadServerParams) -> LoadOrCreateResult:
         try:
-            server_data_dir = params["server_data_dir"]
-            default_path = os.path.join(server_data_dir, "default")
-            name = os.path.basename(SymlinkUtil.read_link(default_path))
-
-            salt_manager = SaltManager(SALT_FILE_PATH)
-            salt = salt_manager.fetch_or_create()
-
+            default_path = os.path.join(
+                self.server_data_manager.server_data_dir, "default"
+            )
+            real_name = os.path.basename(SymlinkUtil.read_link(default_path))
             password = params["password"]
 
-            decrypt_params: DecryptServerParams = {
-                "server_data_dir": server_data_dir,
-                "encrypted_name": name,
-                "salt": salt,
-                "password": params["password"],
+            load_params: LoadServerParams = {
+                "server_name": real_name,
+                "password": password,
             }
 
-            server_data = self.server_data_manager.decrypt(decrypt_params)
+            server_data = self.server_data_manager.decrypt(load_params)
 
             return {
                 "server_data": server_data,
-                "server_name": name,
-                "server_data_dir": server_data_dir,
+                "server_name": real_name,
                 "password": password,
             }
         except Exception as e:
             logger.error(f"Failed to load server data: {e}")
             raise ServerDataError(f"Failed to load server data: {e}")
 
-    def _create(self, params: LoadOrCreateParams) -> LoadOrCreateResult:
+    def _create(self, params: CreateServerParams) -> LoadOrCreateResult:
         try:
-            server_data_dir = params["server_data_dir"]
-
-            salt_manager = SaltManager(SALT_FILE_PATH)
-            salt = salt_manager.fetch_or_create()
-
             max_messages = params["max_messages"] or 2
             password = params["password"]
             server_name = params["server_name"]
 
             create_params: CreateServerParams = {
-                "server_data_dir": server_data_dir,
                 "server_name": server_name,
-                "salt": salt,
                 "password": password,
                 "max_messages": max_messages,
             }
@@ -199,23 +173,25 @@ class ServerDataInteraction:
             return {
                 "server_data": server_data,
                 "server_name": server_name,
-                "server_data_dir": server_data_dir,
                 "password": password,
             }
         except Exception as e:
             logger.error(f"Failed to create server data: {e}")
             raise ServerDataError(f"Failed to create server data: {e}")
 
-    def load_or_create(self, params: LoadOrCreateParams) -> LoadOrCreateResult:
+    def load_or_create(self, params: CreateServerParams) -> LoadOrCreateResult:
         try:
-            server_data_dir = params["server_data_dir"]
+            # Create The Server Data Directory If It Doesn't Exist
+            os.makedirs(self.server_data_manager.server_data_dir, exist_ok=True)
+            default_path = os.path.join(
+                self.server_data_manager.server_data_dir, "default"
+            )
 
-            os.makedirs(server_data_dir, exist_ok=True)
-            default_path = os.path.join(server_data_dir, "default")
-
+            # If The Default Server Data Exists, Load It
             if SymlinkUtil.exists(default_path):
                 return self._load(params)
             else:
+                # Otherwise, Create A New Server Data File
                 return self._create(params)
         except OSError as e:
             logger.error(f"File system error: {e}")
@@ -224,43 +200,51 @@ class ServerDataInteraction:
             logger.error(f"Failed to get server data: {e}")
             raise ServerDataError(f"Failed to get server data: {e}")
 
-    def interactive_setup(
-        self,
-        params: InteractiveSetupParams,
-    ) -> LoadOrCreateResult:
+    def interactive_setup(self) -> LoadOrCreateResult:
         try:
-            server_data_dir = params["server_data_dir"]
-            path_to_default_server_data = os.path.join(server_data_dir, "default")
+            path_to_default_server_data = os.path.join(
+                self.server_data_manager.server_data_dir, "default"
+            )
 
+            # If The Default Server Data Exists, Load It
             if SymlinkUtil.exists(path_to_default_server_data):
-                name = os.path.basename(
+                # Ensure Server Is Loaded By Actual Name, Not The Link
+                server_name = os.path.basename(
                     SymlinkUtil.read_link(path_to_default_server_data)
                 )
-                password = getpass.getpass(f"Decryption Key for {name}: ")
-                load_params: LoadOrCreateParams = {
-                    "server_data_dir": params["server_data_dir"],
-                    "password": password,
-                    "server_name": name,
-                    "max_messages": 2,
-                }
+
+                # Prompt For Password
+                password = getpass.getpass(f"Decryption Key for {server_name}: ")
                 try:
+                    # Load The Server Data
+                    load_params: LoadServerParams = {
+                        "server_name": server_name,
+                        "password": password,
+                    }
                     return self._load(load_params)
                 except Exception as e:
                     raise ServerLoadError(f"Failed to load existing server: {e}")
             else:
+                # Otherwise, Prompt For New Server Configuration
                 logger.warning(
-                    f"No server configuration found at {path_to_default_server_data}"
+                    f"No Server Configuration Found At {path_to_default_server_data}"
                 )
                 while True:
                     if self._prompt_for_new_server_confirmation():
                         try:
+                            # Prompt For Server Name
                             server_name = self._prompt_for_server_name()
+
+                            # Prompt For Maximum Number Of Messages
                             max_messages = self._prompt_for_max_messages()
+
+                            # Prompt For Password
                             password = getpass.getpass(
                                 "Enter a password to encrypt the server data: "
                             )
-                            create_params: LoadOrCreateParams = {
-                                "server_data_dir": params["server_data_dir"],
+
+                            # Create The Server Data
+                            create_params: CreateServerParams = {
                                 "password": password,
                                 "server_name": server_name,
                                 "max_messages": max_messages,

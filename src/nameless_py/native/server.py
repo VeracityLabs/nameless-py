@@ -4,15 +4,13 @@ from nameless_py.native.library.server.monolithic import NativeMonolithicIssuer
 from nameless_py.native.util.server.data_manager import (
     ServerDataManager,
     SaveServerParams,
-    DecryptServerParams,
+    LoadServerParams,
     CreateServerParams,
     CheckServerExistsParams,
 )
 from nameless_py.native.util.server.interactive_setup import (
     ServerDataInteraction,
-    InteractiveSetupParams,
 )
-from nameless_py.native.util.encryption.salt_manager import SaltManager
 from nameless_py.native.util.logging import logger
 from fastapi import FastAPI, HTTPException, Request, APIRouter, Depends
 from contextlib import asynccontextmanager
@@ -25,7 +23,6 @@ import uvicorn
 import asyncio
 import importlib.util
 import logging
-import os
 import getpass
 import sys
 
@@ -185,9 +182,7 @@ async def lifespan(app: FastAPI):
         # Create The Server Data When Needed If Silent Mode Is Enabled
         if app.state.silent_mode:
             create_params: CreateServerParams = {
-                "server_data_dir": app.state.server_data_dir,
-                "server_name": app.state.data_manager.get_random_server_name(),
-                "salt": app.state.salt,
+                "server_name": app.state.data_manager.generate_server_name(),
                 "password": app.state.password,
                 "max_messages": app.state.max_messages,
             }
@@ -200,25 +195,19 @@ async def lifespan(app: FastAPI):
         else:
             # For Checking Whether The Default Server Data Exists
             check_if_default_exists: CheckServerExistsParams = {
-                "server_data_dir": app.state.server_data_dir,
-                "encrypted_name": "default",
+                "server_name": "default",
             }
             try:
                 # If The Default Server Data Does Not Exist, Run The Interactive Setup Tool To Create It
                 if not app.state.data_manager.exists(check_if_default_exists):
-                    automatic_setup_tool = ServerDataInteraction()
-                    params: InteractiveSetupParams = {
-                        "server_data_dir": app.state.server_data_dir,
-                    }
-                    generated_server = automatic_setup_tool.interactive_setup(params)
+                    automatic_setup_tool = ServerDataInteraction(app.state.data_manager)
+                    generated_server = automatic_setup_tool.interactive_setup()
                     initial_server_data = generated_server["server_data"]
                     app.state.server_name = generated_server["server_name"]
                 else:
                     # If The Default Server Data Exists, Decrypt It
-                    decrypt_params: DecryptServerParams = {
-                        "server_data_dir": app.state.server_data_dir,
-                        "encrypted_name": "default",
-                        "salt": app.state.salt,
+                    decrypt_params: LoadServerParams = {
+                        "server_name": "default",
                         "password": app.state.password,
                     }
                     initial_server_data = app.state.data_manager.decrypt(decrypt_params)
@@ -250,17 +239,18 @@ async def lifespan(app: FastAPI):
 
         # Save The Server Data If It Has Changed
         if initial_server_data != final_server_data:
+            logger.info("Server Data Has Changed. Saving...")
             save_params: SaveServerParams = {
-                "server_data_dir": app.state.server_data_dir,
-                "encrypted_name": "default",
+                "server_name": "default",
                 "server_data": final_server_data,
-                "salt": app.state.password,
                 "password": app.state.password,
             }
             try:
                 app.state.data_manager.save(save_params)
             except Exception as e:
                 raise DataManagerError(f"Failed to save server data: {e}")
+        else:
+            logger.info("Server Data Has Not Changed. Skipping Save.")
 
     except asyncio.CancelledError:
         logger.info("Server Shutting Down.")
@@ -671,21 +661,15 @@ def main(
         else:
             data_manager = ServerDataManager()
             params: CheckServerExistsParams = {
-                "server_data_dir": server_dir or SERVER_DATA_DIR,
-                "encrypted_name": "default",
+                "server_name": "default",
             }
             # If The Password Is Already Set, Don't Ask For It.
-            # 
+            #
             # If The Default Server Data Doesn't Exist, Don't Ask For A Password Either:
             # Since We Will Generate A New Password Interactively, We Can Skip Here.
             if not password and data_manager.exists(params):
                 app.state.password = getpass.getpass("Enter Server Password: ")
                 logger.info("Password Read Successfully.")
-
-        # Set The Server Data Directory
-        salt_manager = SaltManager(SALT_FILE_PATH)
-        app.state.salt = salt_manager.fetch_or_create()
-        app.state.server_data_dir = server_dir or SERVER_DATA_DIR
 
         # Set The Server State
         app.state.silent_mode = silent

@@ -5,7 +5,9 @@ from nameless_py.native.util.encryption.data_encryption import (
 )
 from nameless_py.native.library.server.monolithic import NativeMonolithicIssuer
 from nameless_py.native.util.filesystem.symlink_manager import SymlinkUtil, SymlinkError
-from typing import TypedDict
+from nameless_py.native.util.encryption.salt_manager import SaltManager
+from nameless_py.config import SALT_FILE_PATH, SERVER_DATA_DIR
+from typing import Optional, TypedDict
 import os
 import base64
 import random
@@ -43,78 +45,76 @@ class ServerDataSaveError(ServerDataError):
 
 
 class SetServerAsDefaultParams(TypedDict):
-    server_data_dir: str
-    encrypted_name: str
+    server_name: str
 
 
 class CheckServerExistsParams(TypedDict):
-    server_data_dir: str
-    encrypted_name: str
+    server_name: str
 
 
-class DecryptServerParams(TypedDict):
-    server_data_dir: str
-    encrypted_name: str
-    salt: bytes
+class LoadServerParams(TypedDict):
+    server_name: str
     password: str
 
 
 class CreateServerParams(TypedDict):
-    server_data_dir: str
     server_name: str
-    salt: bytes
     password: str
     max_messages: int
 
 
 class SaveServerParams(TypedDict):
-    server_data_dir: str
-    encrypted_name: str
+    server_name: str
     server_data: bytes
-    salt: bytes
     password: str
 
 
 class ServerDataManager:
-    def __init__(self):
+    def __init__(
+        self,
+        server_data_dir: Optional[str] = None,
+        salt_file_path: Optional[str] = None,
+    ):
         self.encryption = AESDataEncryption()
+        self.salt_manager = SaltManager(salt_file_path or SALT_FILE_PATH)
+        self.server_data_dir = server_data_dir or SERVER_DATA_DIR
+
+    def get_salt_manager(self) -> SaltManager:
+        return self.salt_manager
 
     @staticmethod
-    def get_random_server_name() -> str:
+    def generate_server_name() -> str:
         return "".join(random.choices(string.ascii_letters + string.digits, k=16))
 
     def exists(self, params: CheckServerExistsParams) -> bool:
-        return os.path.exists(
-            os.path.join(params["server_data_dir"], params["encrypted_name"])
-        )
+        return os.path.exists(os.path.join(self.server_data_dir, params["server_name"]))
 
     def create_default_if_not_exists(self, params: CreateServerParams) -> bytes:
         check_params: CheckServerExistsParams = {
-            "server_data_dir": params["server_data_dir"],
-            "encrypted_name": "default",
+            "server_name": "default",
         }
 
-        # Create If Not Exists
+        # Create If Default Not Exists
         if not self.exists(check_params):
             data = self.create(params)
-            self.set_server_as_default(check_params)
+            actual_server_name = params["server_name"]
+            set_as_default_params: SetServerAsDefaultParams = {
+                "server_name": actual_server_name,
+            }
+            self.set_server_as_default(set_as_default_params)
             return data
 
-        # Decrypt If Exists
-        decryption_params: DecryptServerParams = {
-            "server_data_dir": params["server_data_dir"],
-            "encrypted_name": "default",
-            "salt": params["salt"],
+        # Decrypt If Default Exists
+        decryption_params: LoadServerParams = {
+            "server_name": "default",
             "password": params["password"],
         }
         return self.decrypt(decryption_params)
 
     def set_server_as_default(self, params: SetServerAsDefaultParams) -> None:
         try:
-            default_path = os.path.join(params["server_data_dir"], "default")
-            target_path = os.path.join(
-                params["server_data_dir"], params["encrypted_name"]
-            )
+            default_path = os.path.join(self.server_data_dir, "default")
+            target_path = os.path.join(self.server_data_dir, params["server_name"])
 
             if not os.path.exists(target_path):
                 raise ServerDataError(f"Server data file not found: {target_path}")
@@ -130,18 +130,21 @@ class ServerDataManager:
             logger.error(f"Failed to set server as default: {e}")
             raise ServerDataError(f"Failed to set server as default: {e}")
 
-    def decrypt(self, params: DecryptServerParams) -> bytes:
+    def decrypt(self, params: LoadServerParams) -> bytes:
         try:
-            server_data_path = os.path.join(
-                params["server_data_dir"], params["encrypted_name"]
-            )
+            server_data_path = os.path.join(self.server_data_dir, params["server_name"])
+
+            # Resolve symlink if it exists
+            if SymlinkUtil.exists(server_data_path):
+                server_data_path = SymlinkUtil.read_link(server_data_path)
+
             with open(server_data_path, "rb") as f:
                 encrypted_data = f.read()
             return self.encryption.decrypt_data(
                 {
                     "encrypted_data": encrypted_data,
                     "password": params["password"],
-                    "salt": params["salt"],
+                    "salt": self.salt_manager.fetch(),
                 }
             )
         except FileNotFoundError:
@@ -160,12 +163,11 @@ class ServerDataManager:
             encrypted_name = base64.b64encode(
                 params["server_name"].encode("ascii")
             ).decode("ascii")
+            password = params["password"]
             save_params: SaveServerParams = {
-                "server_data_dir": params["server_data_dir"],
-                "encrypted_name": encrypted_name,
+                "server_name": encrypted_name,
                 "server_data": server_data,
-                "salt": params["salt"],
-                "password": params["password"],
+                "password": password,
             }
             self.save(save_params)
             return server_data
@@ -173,27 +175,29 @@ class ServerDataManager:
             logger.error(f"Failed to create new server data: {e}")
             raise ServerDataCreationError(f"Failed to create new server data: {e}")
 
-    def save(self, params: SaveServerParams):
+    def save(self, params: SaveServerParams) -> None:
         try:
-            if params["encrypted_name"] == "default":
-                raise ServerDataSaveError("Cannot save server data with name 'default'")
+            if params["server_name"] == "default":
+                raise ServerDataSaveError("Cannot Save Server Data With Name 'default'")
 
-            if not os.path.exists(params["server_data_dir"]):
-                os.makedirs(params["server_data_dir"])
+            if not os.path.exists(self.server_data_dir):
+                os.makedirs(self.server_data_dir)
+
+            data = params["server_data"]
+            password = params["password"]
+            salt = self.salt_manager.fetch()
             encrypted_data = self.encryption.encrypt_data(
                 {
-                    "data": params["server_data"],
-                    "password": params["password"],
-                    "salt": params["salt"],
+                    "data": data,
+                    "password": password,
+                    "salt": salt,
                 }
             )
-            server_data_path = os.path.join(
-                params["server_data_dir"], params["encrypted_name"]
-            )
+            server_data_path = os.path.join(self.server_data_dir, params["server_name"])
             with open(server_data_path, "wb") as f:
                 f.write(encrypted_data)
-            default_path = os.path.join(params["server_data_dir"], "default")
-            SymlinkUtil._create_symlink(server_data_path, default_path)
+
+            return None
         except OSError as e:
             raise ServerDataSaveError(f"Failed to save server data: {e}")
         except Exception as e:
