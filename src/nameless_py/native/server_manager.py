@@ -118,7 +118,7 @@ def change_default(ctx, server_id):
         console.print("Unexpected Error:", e, style="bold red")
 
 
-@cli.command()
+@click.command()
 @click.argument("server_id")
 @click.argument("output_filename")
 @click.option("--password", prompt=True, hide_input=True, help="Decryption password")

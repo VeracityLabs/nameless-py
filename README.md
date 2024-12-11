@@ -75,32 +75,39 @@ See the [library documentation](docs/lib.md) for more information.
 
 ## Commands
 
-### see3-cli
+### nameless-cli
 
-The `see3-cli` command is a versatile tool for managing anonymous credentials. It includes the following functionalities:
+The `nameless-cli` command is a versatile tool for managing anonymous credentials. It includes the following functionalities:
 
-- `setup_credential_request <output_path>`: Helps you set up a credential request configuration file.
-- `request_credential <config_path>`: Requests a credential using the provided configuration file.
-- `verify_signature [--from-file <path>] <public_key> <proof> <accumulator> <data>`: Verifies a signature.
-- `sign_with_credential <credential_id> <data_to_sign> <public_indices> [--output <path>]`: Signs data using a credential.
+- `setup-credential-request <output_path>`: Helps you set up a credential request configuration file.
+- `request-credential <config_path>`: Requests a credential using the provided configuration file.
+- `verify-raw-signature [--from-file <path>] <public_key> <proof> <accumulator> <data>`: Verifies a raw signature.
+- `verify-jws-signature`: Verifies a JWS-encoded Nameless signature.
+- `sign-with-credential <credential_id> <data_to_sign> <public_indices> [--output <path>]`: Signs data using a credential.
 
-### see3-server-manager
+### nameless-server-manager
 
-The `see3-server-manager` command is used to manage server data. It includes the following functionalities:
+The `nameless-server-manager` command is used to manage server data. It includes the following functionalities:
 
 - `list`: List all server IDs.
-- `change_default <server_id>`: Change the default server.
+- `change-default <server_id>`: Change the default server.
 - `decrypt <server_id> <output_path>`: Decrypt the server data.
 
-### see3-server
+You can optionally specify a custom server directory with `--server_dir PATH`.
 
-The `see3-server` command is used to start the server. It takes one argument:
+### nameless-server
 
-- `--port`: Set the port for the server.
+The `nameless-server` command is used to start the server. It requires the following arguments:
 
-You must also provide the path to a script conditional.
+- `--script_path`: Path to the conditional script [required]
+- `--port`: Port to run the server on [optional]
+- `--log_path`: Path to log file [optional]
+- `--server_dir`: Path to server data directory [optional]
+- `--silent`: Run in silent mode [optional]
+- `--password`: Password for the server (required in silent mode)
+- `--max_messages`: Maximum number of messages (required in silent mode)
 
-The CLI will prompt you to generate a server configuration, which will be encrypted. All server configurations are stored in the `~/.veracity_server` directory.
+The server configuration will be encrypted and stored in the specified server directory.
 
 #### What Is A Script Conditional?
 
