@@ -1,4 +1,4 @@
-from nameless_py.config import SERVER_DATA_DIR
+from nameless_py.config import SERVER_DATA_DIR, SALT_FILE_PATH
 from nameless_py.ffi.nameless_rs import PartialCredential, Identifier, NamelessSignature
 from nameless_py.native.library.server.monolithic import NativeMonolithicIssuer
 from nameless_py.native.util.server.data_manager import (
@@ -6,7 +6,13 @@ from nameless_py.native.util.server.data_manager import (
     SaveServerParams,
     DecryptServerParams,
     CreateServerParams,
+    CheckServerExistsParams,
 )
+from nameless_py.native.util.server.interactive_setup import (
+    ServerDataInteraction,
+    InteractiveSetupParams,
+)
+from nameless_py.native.util.encryption.salt_manager import SaltManager
 from nameless_py.native.util.logging import logger
 from fastapi import FastAPI, HTTPException, Request, APIRouter, Depends
 from contextlib import asynccontextmanager
@@ -20,6 +26,7 @@ import asyncio
 import importlib.util
 import logging
 import os
+import getpass
 import sys
 
 
@@ -180,7 +187,7 @@ async def lifespan(app: FastAPI):
             create_params: CreateServerParams = {
                 "server_data_dir": app.state.server_data_dir,
                 "server_name": app.state.data_manager.get_random_server_name(),
-                "salt": app.state.password,
+                "salt": app.state.salt,
                 "password": app.state.password,
                 "max_messages": app.state.max_messages,
             }
@@ -192,14 +199,27 @@ async def lifespan(app: FastAPI):
                 raise DataManagerError(f"Failed to create server data: {e}")
         else:
             # Decrypt The Server Data If Silent Mode Is Disabled
-            decrypt_params: DecryptServerParams = {
+            check_params: CheckServerExistsParams = {
                 "server_data_dir": app.state.server_data_dir,
                 "encrypted_name": "default",
-                "salt": app.state.password,
-                "password": app.state.password,
             }
             try:
-                initial_server_data = app.state.data_manager.decrypt(decrypt_params)
+                if not app.state.data_manager.exists(check_params):
+                    automatic_setup_tool = ServerDataInteraction()
+                    params: InteractiveSetupParams = {
+                        "server_data_dir": app.state.server_data_dir,
+                    }
+                    generated_server = automatic_setup_tool.interactive_setup(params)
+                    initial_server_data = generated_server["server_data"]
+                    app.state.server_name = generated_server["server_name"]
+                else:
+                    decrypt_params: DecryptServerParams = {
+                        "server_data_dir": app.state.server_data_dir,
+                        "encrypted_name": "default",
+                        "salt": app.state.salt,
+                        "password": app.state.password,
+                    }
+                    initial_server_data = app.state.data_manager.decrypt(decrypt_params)
             except Exception as e:
                 raise AuthenticationError(f"Failed to decrypt server data: {e}")
 
@@ -310,7 +330,7 @@ class AccumulatorQuery(BaseModel):
     end: int
 
 
-@router.get("/fetch_accumulators")
+@router.post("/fetch_accumulators")
 async def fetch_accumulators(
     accumulator_query: AccumulatorQuery,
     config: ServerConfig = Depends(get_server_config),
@@ -637,20 +657,6 @@ def main(
         app.state.revoke_checks = extensions["revoke"]
         app.state.open_checks = extensions["open"]
 
-        # Include The Routes
-        app.include_router(router)
-
-        # Include The Additional Routes, If They Exist
-        if extensions["additional_routes"]:
-            app.include_router(extensions["additional_routes"])
-
-        # Set The Server Data Directory
-        app.state.server_data_dir = server_dir or SERVER_DATA_DIR
-
-        # Set The Server State
-        app.state.silent_mode = silent
-        app.state.max_messages = max_messages
-
         # Set The Password If Silent Mode Is Enabled
         if silent:
             if not password:
@@ -660,8 +666,33 @@ def main(
                 raise AuthenticationError("Password is Required in Silent Mode")
             app.state.password = password
             logger.info("Silent authentication successful.")
+        else:
+            data_manager = ServerDataManager()
+            params: CheckServerExistsParams = {
+                "server_data_dir": server_dir or SERVER_DATA_DIR,
+                "encrypted_name": "default",
+            }
+            if not password and data_manager.exists(params):
+                app.state.password = getpass.getpass("Enter Server Password: ")
+                logger.info("Password Read Successfully.")
 
-        logger.info(f"Server is initialized at port {port}.")
+        # Set The Server Data Directory
+        salt_manager = SaltManager(SALT_FILE_PATH)
+        app.state.salt = salt_manager.fetch_or_create()
+        app.state.server_data_dir = server_dir or SERVER_DATA_DIR
+
+        # Set The Server State
+        app.state.silent_mode = silent
+        app.state.max_messages = max_messages
+
+        # Include The Routes
+        app.include_router(router)
+
+        # Include The Additional Routes, If They Exist
+        if extensions["additional_routes"]:
+            app.include_router(extensions["additional_routes"])
+
+        logger.info(f"Server Is Initialized At Port {port}.")
         uvicorn.run(app, host="0.0.0.0", port=port, log_level="warning")
 
     except (ScriptImportError, AuthenticationError) as e:

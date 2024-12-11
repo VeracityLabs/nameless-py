@@ -71,19 +71,21 @@ class ServerCreationError(ServerSetupError):
 
 
 class LoadOrCreateParams(TypedDict):
-    server_data_dir_given: Optional[str]
-    password: str
+    server_data_dir: str
     server_name: str
+    password: str
     max_messages: int
 
 
 class LoadOrCreateResult(TypedDict):
+    server_data_dir: str
+    server_name: str
     server_data: bytes
-    name: str
+    password: str
 
 
 class InteractiveSetupParams(TypedDict):
-    server_data_dir_given: Optional[str]
+    server_data_dir: str
 
 
 class ServerDataInteraction:
@@ -91,7 +93,7 @@ class ServerDataInteraction:
 
     def __init__(self):
         self.server_data_manager = ServerDataManager()
-        self.salt_manager = SaltManager()
+        self.salt_manager = SaltManager(SALT_FILE_PATH)
 
     @staticmethod
     def _prompt_for_server_name() -> str:
@@ -145,40 +147,76 @@ class ServerDataInteraction:
                 logger.warning("Invalid input. Please enter 'y' or 'n'.")
                 raise UserConfirmationError("Invalid confirmation input")
 
+    def _load(self, params: LoadOrCreateParams) -> LoadOrCreateResult:
+        try:
+            server_data_dir = params["server_data_dir"]
+            default_path = os.path.join(server_data_dir, "default")
+            name = os.path.basename(SymlinkUtil.read_link(default_path))
+
+            salt_manager = SaltManager(SALT_FILE_PATH)
+            salt = salt_manager.fetch_or_create()
+
+            password = params["password"]
+
+            decrypt_params: DecryptServerParams = {
+                "server_data_dir": server_data_dir,
+                "encrypted_name": name,
+                "salt": salt,
+                "password": params["password"],
+            }
+
+            server_data = self.server_data_manager.decrypt(decrypt_params)
+
+            return {
+                "server_data": server_data,
+                "server_name": name,
+                "server_data_dir": server_data_dir,
+                "password": password,
+            }
+        except Exception as e:
+            logger.error(f"Failed to load server data: {e}")
+            raise ServerDataError(f"Failed to load server data: {e}")
+
+    def _create(self, params: LoadOrCreateParams) -> LoadOrCreateResult:
+        try:
+            server_data_dir = params["server_data_dir"]
+
+            salt_manager = SaltManager(SALT_FILE_PATH)
+            salt = salt_manager.fetch_or_create()
+
+            max_messages = params["max_messages"] or 2
+            password = params["password"]
+            server_name = params["server_name"]
+
+            create_params: CreateServerParams = {
+                "server_data_dir": server_data_dir,
+                "server_name": server_name,
+                "salt": salt,
+                "password": password,
+                "max_messages": max_messages,
+            }
+            server_data = self.server_data_manager.create(create_params)
+            return {
+                "server_data": server_data,
+                "server_name": server_name,
+                "server_data_dir": server_data_dir,
+                "password": password,
+            }
+        except Exception as e:
+            logger.error(f"Failed to create server data: {e}")
+            raise ServerDataError(f"Failed to create server data: {e}")
+
     def load_or_create(self, params: LoadOrCreateParams) -> LoadOrCreateResult:
         try:
-            server_data_dir = params["server_data_dir_given"] or SERVER_DATA_DIR
-            salt_file_path = SALT_FILE_PATH
+            server_data_dir = params["server_data_dir"]
 
             os.makedirs(server_data_dir, exist_ok=True)
-            salt = self.salt_manager.fetch_or_create(salt_file_path)
             default_path = os.path.join(server_data_dir, "default")
 
             if SymlinkUtil.exists(default_path):
-                name = os.path.basename(SymlinkUtil.read_link(default_path))
-                decrypt_params: DecryptServerParams = {
-                    "server_data_dir": server_data_dir,
-                    "encrypted_name": name,
-                    "salt": salt,
-                    "password": params["password"],
-                }
-                return {
-                    "server_data": self.server_data_manager.decrypt(decrypt_params),
-                    "name": name,
-                }
+                return self._load(params)
             else:
-                create_params: CreateServerParams = {
-                    "server_data_dir": server_data_dir,
-                    "server_name": params["server_name"],
-                    "salt": salt,
-                    "password": params["password"],
-                    "max_messages": params["max_messages"] or 2,
-                }
-                server_data = self.server_data_manager.create(create_params)
-                return {
-                    "server_data": server_data,
-                    "name": params["server_name"],
-                }
+                return self._create(params)
         except OSError as e:
             logger.error(f"File system error: {e}")
             raise ServerSetupError(f"File system error: {e}")
@@ -191,7 +229,7 @@ class ServerDataInteraction:
         params: InteractiveSetupParams,
     ) -> LoadOrCreateResult:
         try:
-            server_data_dir = params["server_data_dir_given"] or SERVER_DATA_DIR
+            server_data_dir = params["server_data_dir"]
             path_to_default_server_data = os.path.join(server_data_dir, "default")
 
             if SymlinkUtil.exists(path_to_default_server_data):
@@ -200,13 +238,13 @@ class ServerDataInteraction:
                 )
                 password = getpass.getpass(f"Decryption Key for {name}: ")
                 load_params: LoadOrCreateParams = {
-                    "server_data_dir_given": params["server_data_dir_given"],
+                    "server_data_dir": params["server_data_dir"],
                     "password": password,
                     "server_name": name,
                     "max_messages": 2,
                 }
                 try:
-                    return self.load_or_create(load_params)
+                    return self._load(load_params)
                 except Exception as e:
                     raise ServerLoadError(f"Failed to load existing server: {e}")
             else:
@@ -222,9 +260,7 @@ class ServerDataInteraction:
                                 "Enter a password to encrypt the server data: "
                             )
                             create_params: LoadOrCreateParams = {
-                                "server_data_dir_given": params[
-                                    "server_data_dir_given"
-                                ],
+                                "server_data_dir": params["server_data_dir"],
                                 "password": password,
                                 "server_name": server_name,
                                 "max_messages": max_messages,
