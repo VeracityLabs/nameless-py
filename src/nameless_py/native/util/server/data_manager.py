@@ -4,10 +4,12 @@ from nameless_py.native.util.encryption.data_encryption import (
     DecryptionError,
 )
 from nameless_py.native.library.server.monolithic import NativeMonolithicIssuer
-from nameless_py.native.util.filesystem.symlink_manager import SymlinkUtil
+from nameless_py.native.util.filesystem.symlink_manager import SymlinkUtil, SymlinkError
 from typing import TypedDict
 import os
 import base64
+import random
+import string
 
 
 ###
@@ -40,6 +42,16 @@ class ServerDataSaveError(ServerDataError):
 ###
 
 
+class SetServerAsDefaultParams(TypedDict):
+    server_data_dir: str
+    encrypted_name: str
+
+
+class CheckServerExistsParams(TypedDict):
+    server_data_dir: str
+    encrypted_name: str
+
+
 class DecryptServerParams(TypedDict):
     server_data_dir: str
     encrypted_name: str
@@ -66,6 +78,57 @@ class SaveServerParams(TypedDict):
 class ServerDataManager:
     def __init__(self):
         self.encryption = AESDataEncryption()
+
+    @staticmethod
+    def get_random_server_name() -> str:
+        return "".join(random.choices(string.ascii_letters + string.digits, k=16))
+
+    def exists(self, params: CheckServerExistsParams) -> bool:
+        return os.path.exists(
+            os.path.join(params["server_data_dir"], params["encrypted_name"])
+        )
+
+    def create_default_if_not_exists(self, params: CreateServerParams) -> bytes:
+        check_params: CheckServerExistsParams = {
+            "server_data_dir": params["server_data_dir"],
+            "encrypted_name": "default",
+        }
+
+        # Create If Not Exists
+        if not self.exists(check_params):
+            data = self.create(params)
+            self.set_server_as_default(check_params)
+            return data
+
+        # Decrypt If Exists
+        decryption_params: DecryptServerParams = {
+            "server_data_dir": params["server_data_dir"],
+            "encrypted_name": "default",
+            "salt": params["salt"],
+            "password": params["password"],
+        }
+        return self.decrypt(decryption_params)
+
+    def set_server_as_default(self, params: SetServerAsDefaultParams) -> None:
+        try:
+            default_path = os.path.join(params["server_data_dir"], "default")
+            target_path = os.path.join(
+                params["server_data_dir"], params["encrypted_name"]
+            )
+
+            if not os.path.exists(target_path):
+                raise ServerDataError(f"Server data file not found: {target_path}")
+
+            try:
+                SymlinkUtil._create_symlink(target_path, default_path)
+            except SymlinkError as e:
+                raise ServerDataError(f"Failed to create default symlink: {e}")
+
+        except KeyError as e:
+            raise ServerDataError(f"Missing required parameter: {e}")
+        except Exception as e:
+            logger.error(f"Failed to set server as default: {e}")
+            raise ServerDataError(f"Failed to set server as default: {e}")
 
     def decrypt(self, params: DecryptServerParams) -> bytes:
         try:

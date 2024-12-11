@@ -1,12 +1,14 @@
+from nameless_py.ffi.nameless_rs import *
+from nameless_py.native.util.bytes.hex_string import HexStringUtil
 from typing import Callable, Optional, List
 from dataclasses import dataclass
-from nameless_py.ffi.nameless_rs import *
 import json
 
 # Type alias for a function that verifies an accumulator value and signature
 AccumulatorVerifier = Callable[[AccumulatorValue, AccumulatorSignature], bool]
 
 
+# TODO: This Is Non-Standard Serialization And Deserialization
 @dataclass
 class NativeAccumulatorStoreEntry:
     """
@@ -22,21 +24,50 @@ class NativeAccumulatorStoreEntry:
 
     def to_json(self) -> dict:
         """Convert entry to JSON-serializable dictionary"""
-        raise NotImplementedError
+        result = {
+            "accumulator_value": HexStringUtil.bytes_to_str(
+                self.accumulator_value.export_cbor()
+            )
+        }
+        if self.accumulator_signature:
+            result["accumulator_signature"] = HexStringUtil.bytes_to_str(
+                self.accumulator_signature.export_cbor()
+            )
+        return result
 
     def to_bytes(self) -> bytes:
         """Convert entry to bytes representation"""
-        raise NotImplementedError
+        return json.dumps(self.to_json()).encode("utf-8")
 
     @classmethod
     def from_json(cls, data_dict: dict) -> "NativeAccumulatorStoreEntry":
         """Create entry from JSON dictionary"""
-        raise NotImplementedError
+        acc_value_result = HexStringUtil.str_to_bytes(data_dict["accumulator_value"])
+        if acc_value_result.is_err():
+            raise ValueError(
+                f"Invalid accumulator value hex: {acc_value_result.unwrap_err()}"
+            )
+        accumulator_value = AccumulatorValue.import_cbor(acc_value_result.unwrap())
+
+        accumulator_signature = None
+        if "accumulator_signature" in data_dict:
+            sig_result = HexStringUtil.str_to_bytes(data_dict["accumulator_signature"])
+            if sig_result.is_err():
+                raise ValueError(f"Invalid signature hex: {sig_result.unwrap_err()}")
+            accumulator_signature = AccumulatorSignature.import_cbor(
+                sig_result.unwrap()
+            )
+
+        return cls(
+            accumulator_value=accumulator_value,
+            accumulator_signature=accumulator_signature,
+        )
 
     @classmethod
     def from_bytes(cls, data: bytes) -> "NativeAccumulatorStoreEntry":
         """Create entry from bytes representation"""
-        raise NotImplementedError
+        data_dict = json.loads(data.decode("utf-8"))
+        return cls.from_json(data_dict)
 
 
 class NativeAccumulatorStore:
@@ -45,6 +76,8 @@ class NativeAccumulatorStore:
 
     Provides list-like interface for storing and accessing accumulator entries.
     """
+
+    entries: List[NativeAccumulatorStoreEntry]
 
     def __init__(self) -> None:
         """Initialize empty accumulator store"""

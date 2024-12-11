@@ -130,7 +130,7 @@ def decrypt(ctx, server_id, output_filename, password):
 
         server_dir = ctx.obj["SERVER_DIR"]
         salt_manager = SaltManager(os.path.join(server_dir, "salt", "saltfile"))
-        server_data_manager = ServerDataManager()
+        data_manager = ServerDataManager()
 
         # Get salt
         try:
@@ -143,7 +143,7 @@ def decrypt(ctx, server_id, output_filename, password):
 
         # Decrypt server data
         try:
-            decrypted_data = server_data_manager.decrypt(
+            decrypted_data = data_manager.decrypt(
                 {
                     "server_data_dir": server_dir,
                     "encrypted_name": encrypted_name,
