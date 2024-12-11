@@ -44,14 +44,6 @@ class ServerDataSaveError(ServerDataError):
 ###
 
 
-class SetServerAsDefaultParams(TypedDict):
-    server_name: str
-
-
-class CheckServerExistsParams(TypedDict):
-    server_name: str
-
-
 class LoadServerParams(TypedDict):
     server_name: str
     password: str
@@ -86,22 +78,15 @@ class ServerDataManager:
     def generate_server_name() -> str:
         return "".join(random.choices(string.ascii_letters + string.digits, k=16))
 
-    def exists(self, params: CheckServerExistsParams) -> bool:
-        return os.path.exists(os.path.join(self.server_data_dir, params["server_name"]))
+    def exists(self, server_name: str) -> bool:
+        return os.path.exists(os.path.join(self.server_data_dir, server_name))
 
     def create_default_if_not_exists(self, params: CreateServerParams) -> bytes:
-        check_params: CheckServerExistsParams = {
-            "server_name": "default",
-        }
-
         # Create If Default Not Exists
-        if not self.exists(check_params):
+        if not self.exists("default"):
             data = self.create(params)
             actual_server_name = params["server_name"]
-            set_as_default_params: SetServerAsDefaultParams = {
-                "server_name": actual_server_name,
-            }
-            self.set_server_as_default(set_as_default_params)
+            self.set_server_as_default(actual_server_name)
             return data
 
         # Decrypt If Default Exists
@@ -111,10 +96,10 @@ class ServerDataManager:
         }
         return self.decrypt(decryption_params)
 
-    def set_server_as_default(self, params: SetServerAsDefaultParams) -> None:
+    def set_server_as_default(self, server_name: str) -> None:
         try:
             default_path = os.path.join(self.server_data_dir, "default")
-            target_path = os.path.join(self.server_data_dir, params["server_name"])
+            target_path = os.path.join(self.server_data_dir, server_name)
 
             if not os.path.exists(target_path):
                 raise ServerDataError(f"Server data file not found: {target_path}")

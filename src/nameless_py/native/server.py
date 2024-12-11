@@ -6,7 +6,6 @@ from nameless_py.native.util.server.data_manager import (
     SaveServerParams,
     LoadServerParams,
     CreateServerParams,
-    CheckServerExistsParams,
 )
 from nameless_py.native.util.server.interactive_setup import (
     ServerDataInteraction,
@@ -177,51 +176,11 @@ async def lifespan(app: FastAPI):
         app.state.data_manager = ServerDataManager()
 
         # Initial State Of The Server Data (Used Later To Determine If The Server Data Has Changed)
-        initial_server_data: bytes
-
-        # Create The Server Data When Needed If Silent Mode Is Enabled
-        if app.state.silent_mode:
-            create_params: CreateServerParams = {
-                "server_name": app.state.data_manager.generate_server_name(),
-                "password": app.state.password,
-                "max_messages": app.state.max_messages,
-            }
-            try:
-                initial_server_data = (
-                    app.state.data_manager.create_default_if_not_exists(create_params)
-                )
-            except Exception as e:
-                raise DataManagerError(f"Failed to create server data: {e}")
-        else:
-            # For Checking Whether The Default Server Data Exists
-            check_if_default_exists: CheckServerExistsParams = {
-                "server_name": "default",
-            }
-            try:
-                # If The Default Server Data Does Not Exist, Run The Interactive Setup Tool To Create It
-                if not app.state.data_manager.exists(check_if_default_exists):
-                    automatic_setup_tool = ServerDataInteraction(app.state.data_manager)
-                    generated_server = automatic_setup_tool.interactive_setup()
-                    initial_server_data = generated_server["server_data"]
-                    app.state.server_name = generated_server["server_name"]
-                else:
-                    # If The Default Server Data Exists, Decrypt It
-                    decrypt_params: LoadServerParams = {
-                        "server_name": "default",
-                        "password": app.state.password,
-                    }
-                    initial_server_data = app.state.data_manager.decrypt(decrypt_params)
-            except Exception as e:
-                raise AuthenticationError(f"Failed to decrypt server data: {e}")
-
-        try:
-            issuer = NativeMonolithicIssuer.import_cbor(initial_server_data)
-        except Exception as e:
-            raise IssuerOperationError(f"Failed to initialize issuer: {e}")
+        initial_server_data = app.state.initial_server_data
 
         # Initialize The Server Config
         app.state.server_config = ServerConfig(
-            issuer=issuer,
+            issuer=app.state.issuer,
             data_manager=app.state.data_manager,
             issue_checks=app.state.issue_checks,
             revoke_checks=app.state.revoke_checks,
@@ -600,6 +559,115 @@ def get_extensions_from_script(script_path: str) -> Result[ScriptContent, str]:
 
 
 ###
+# State Generation
+###
+
+
+class InitialServerState:
+    def __init__(
+        self,
+        data_manager: ServerDataManager,
+        issuer: NativeMonolithicIssuer,
+        issue_checks: IssueChecks,
+        revoke_checks: RevokeChecks,
+        open_checks: OpenChecks,
+        password: str,
+        initial_server_data: bytes,
+    ):
+        self.initial_server_data = initial_server_data
+        self.data_manager = data_manager
+        self.issuer = issuer
+        self.issue_checks = issue_checks
+        self.revoke_checks = revoke_checks
+        self.open_checks = open_checks
+        self.password = password
+
+
+class InitialStateBuilder(TypedDict):
+    extensions: ScriptContent
+    is_silent: bool
+    password: Optional[str]
+    max_messages: Optional[int]
+
+
+def generate_initial_state(builder: InitialStateBuilder) -> InitialServerState:
+    """Generate the initial state for the server."""
+
+    issue_checks = builder["extensions"]["issue"]
+    revoke_checks = builder["extensions"]["revoke"]
+    open_checks = builder["extensions"]["open"]
+
+    data_manager = ServerDataManager()
+
+    def load_default_server_data(password: str) -> bytes:
+        load_params: LoadServerParams = {
+            "server_name": "default",
+            "password": password,
+        }
+        return data_manager.decrypt(load_params)
+
+    def create_default_server_data(password: str) -> bytes:
+        return data_manager.create_default_if_not_exists(
+            CreateServerParams(
+                server_name=data_manager.generate_server_name(),
+                password=password,
+                max_messages=builder["max_messages"] or 2,
+            )
+        )
+
+    def get_password_silently(password: Optional[str]) -> str:
+        if not password:
+            logger.error(
+                "Silent Authentication Failed: Password is Required in Silent Mode"
+            )
+            raise AuthenticationError("Password is Required in Silent Mode")
+        logger.info("Silent authentication successful.")
+        return password
+
+    def get_password_interactively() -> str:
+        password = getpass.getpass("Enter Server Password: ")
+        logger.info("Password Read Successfully.")
+        return password
+
+    def create_server_interactively(data_manager: ServerDataManager) -> bytes:
+        automatic_setup_tool = ServerDataInteraction(data_manager)
+        generated_server = automatic_setup_tool.interactive_setup()
+        return generated_server["server_data"]
+
+    # Check If The Default Server Exists
+    default_server_exists = data_manager.exists("default")
+
+    if builder["is_silent"]:
+        password = get_password_silently(builder["password"])
+        if default_server_exists:
+            initial_server_data = load_default_server_data(password)
+        else:
+            initial_server_data = create_default_server_data(password)
+    else:
+        if default_server_exists:
+            password = get_password_interactively()
+            initial_server_data = load_default_server_data(password)
+        else:
+            initial_server_data = create_server_interactively(data_manager)
+
+    try:
+        issuer = NativeMonolithicIssuer.import_cbor(initial_server_data)
+    except Exception as e:
+        raise IssuerOperationError(f"Failed to initialize issuer: {e}")
+
+    # Set The Server State
+    return InitialServerState(
+        initial_server_data=initial_server_data,
+        data_manager=data_manager,
+        issuer=issuer,
+        issue_checks=issue_checks,
+        revoke_checks=revoke_checks,
+        open_checks=open_checks,
+        password=password,
+    )
+
+
+###
 # CLI
 ###
 
@@ -643,37 +711,19 @@ def main(
         # Unwrap The Extensions
         extensions = extensions_result.unwrap()
 
-        # Initialize The Server
+        # Build Server State Ahead Of Time
+        builder: InitialStateBuilder = {
+            "extensions": extensions,
+            "is_silent": silent,
+            "password": password,
+            "max_messages": max_messages,
+        }
+        initial_state = generate_initial_state(builder)
+
+        # Initialize The Server With The State
         app = FastAPI(lifespan=lifespan)
-        app.state.issue_checks = extensions["issue"]
-        app.state.revoke_checks = extensions["revoke"]
-        app.state.open_checks = extensions["open"]
-
-        # Set The Password If Silent Mode Is Enabled
-        if silent:
-            if not password:
-                logger.error(
-                    "Silent Authentication Failed: Password is Required in Silent Mode"
-                )
-                raise AuthenticationError("Password is Required in Silent Mode")
-            app.state.password = password
-            logger.info("Silent authentication successful.")
-        else:
-            data_manager = ServerDataManager()
-            params: CheckServerExistsParams = {
-                "server_name": "default",
-            }
-            # If The Password Is Already Set, Don't Ask For It.
-            #
-            # If The Default Server Data Doesn't Exist, Don't Ask For A Password Either:
-            # Since We Will Generate A New Password Interactively, We Can Skip Here.
-            if not password and data_manager.exists(params):
-                app.state.password = getpass.getpass("Enter Server Password: ")
-                logger.info("Password Read Successfully.")
-
-        # Set The Server State
-        app.state.silent_mode = silent
-        app.state.max_messages = max_messages
+        for key, value in vars(initial_state).items():
+            setattr(app.state, key, value)
 
         # Include The Routes
         app.include_router(router)
