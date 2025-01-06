@@ -1,6 +1,8 @@
 # nameless_py
 
-nameless_py is a solution for anonymous credentials.
+nameless_py is a solution for anonymous credentials, which are useful for a variety of use-cases.
+
+This library was initially built to certify sensor data (images, etc) as real whilst concealing their origin, but it is also suitable for the traditional ZK-ID use-cases as well. 
 
 It provides everything you need to generate, manage, and use anonymous credentials.
 
@@ -13,6 +15,14 @@ This includes:
 nameless_py is part of the See3 SDK, which is implemented for Kotlin, Swift, Expo, TypeScript (Node.js and WASM), Python and Rust. It supports iOS, Android, Linux, MacOS and Windows.
 
 Every library in the SDK is compatible with the Python-based Nameless server, and they are all [bindings](https://en.wikipedia.org/wiki/Language_binding) to the [Rust implementation](https://github.com/VeracityLabs/nameless_rs).
+
+---
+
+**WARNING:** This is alpha-quality software.
+This library also depends on binary blobs, which come from our base Rust implementation.
+The underlying Rust implementation will be made open-source very soon.
+
+---
 
 ## Features
 
